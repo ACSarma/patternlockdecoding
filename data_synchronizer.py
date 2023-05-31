@@ -17,9 +17,11 @@ if __name__ == '__main__':
         offset = len(os.listdir(f'{eeg_dir}/{subdir}'))
         for eegF in os.listdir(f'{eeg_dir}/{subdir}'):
             print(f'Reading {eeg_dir}/{subdir}/{eegF}')
-
-            dfEEG = pd.read_csv(f'{eeg_dir}/{subdir}/{eegF}')
-            dfEEG = dfEEG.sort_values('timestamps')
-            dfEMG = dfEMG.sort_values('timestamps')
-            df = pd.merge_asof(dfEEG, dfEMG, on="timestamps")
-            df.to_csv(f'{synced_dir}/{eegF}')
+            if not os.path.isfile(f'{synced_dir}/{subdir}/{eegF}'):
+                dfEEG = pd.read_csv(f'{eeg_dir}/{subdir}/{eegF}')
+                dfEEG = dfEEG.sort_values('timestamps')
+                dfEMG = dfEMG.sort_values('timestamps')
+                df = pd.merge_asof(dfEEG, dfEMG, on="timestamps")
+                df.to_csv(f'{synced_dir}/{eegF}')
+            else:
+                print("Skipping, already exists.")
