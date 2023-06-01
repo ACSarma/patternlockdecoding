@@ -5,14 +5,14 @@ import csv
 import os
 
 type_dict = {
-    "Simple": [
-        1,
-        5
-    ],
-    # "Medium_Complex": [
-    #     42,
-    #     70
+    # "Simple": [
+    #     1,
+    #     5
     # ],
+    "Medium_Complex": [
+        42,
+        70
+    ],
     # "Complex": [
     #     108,
     #     119
