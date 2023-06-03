@@ -14,8 +14,8 @@ type_dict = {
     #     70
     # ],
     "Complex": [
-        # 108,
-        119
+        108,
+        # 119
     ]
 }
 samples_per_pattern = 10
