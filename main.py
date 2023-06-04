@@ -8,7 +8,6 @@ from datetime import timedelta
 
 
 if __name__ == '__main__':
-
     for f in os.listdir("Data/Sync/"):
         if f.startswith("Complex108") and not f == "Complex108" and not f == "Complex119" and not f == "Medium_Complex70" and not f == "Medium_Complex42" and not f == "Simple5" and not f == "Simple1":
             df = pd.read_csv(f'Data/Sync/{f}')

@@ -22,6 +22,6 @@ if __name__ == '__main__':
                 dfEEG = dfEEG.sort_values('timestamps')
                 dfEMG = dfEMG.sort_values('timestamps')
                 df = pd.merge_asof(dfEEG, dfEMG, on="timestamps")
-                df.to_csv(f'{synced_dir}/{eegF}')
+                df.to_csv(f'{synced_dir}/{subdir}/{eegF}')
             else:
                 print("Skipping, already exists.")

@@ -3,19 +3,21 @@ from muselsl import view
 from muselsl import record
 import csv
 import os
+import keyboard
+import time
 
 type_dict = {
-    # "Simple": [
-    #     1,
-    #     5
-    # ],
-    # "Medium_Complex": [
-    #     42,
-    #     70
-    # ],
+    "Simple": [
+        1,
+        5
+    ],
+    "Medium_Complex": [
+        # 42,
+        # 70
+    ],
     "Complex": [
         # 108,
-        119
+        # 119
     ]
 }
 samples_per_pattern = 10
@@ -24,6 +26,9 @@ directory = "Data/EEG"
 if __name__ == '__main__':
     muses = list_muses()
     # view(version=2)
+
+    print("Wait for Arduino communication")
+    time.sleep(2)
 
     for difficulty in type_dict.keys():
         for pattern in range(len(type_dict[difficulty])):
@@ -37,3 +42,6 @@ if __name__ == '__main__':
 
                 # Note: Streaming is synchronous, so code here will not execute until after the stream has been closed
                 print('Stream has ended')
+
+    print("Pressing 'q' to end Arduino read...")
+    keyboard.press('q')
