@@ -12,12 +12,12 @@ type_dict = {
         # 5
     ],
     "Medium_Complex": [
-        # 42,
-        # 70
+        42,
+        70
     ],
     "Complex": [
-        108,
-        119
+        # 108,
+        # 119
     ]
 }
 samples_per_pattern = 10
