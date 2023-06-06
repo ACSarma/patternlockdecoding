@@ -8,16 +8,16 @@ import time
 
 type_dict = {
     "Simple": [
-        1,
-        5
+        # 1,
+        # 5
     ],
     "Medium_Complex": [
         # 42,
         # 70
     ],
     "Complex": [
-        # 108,
-        # 119
+        108,
+        119
     ]
 }
 samples_per_pattern = 10
