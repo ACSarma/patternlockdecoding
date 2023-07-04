@@ -18,75 +18,13 @@ from sklearn.model_selection import KFold, GroupKFold, StratifiedKFold
 from sklearn.preprocessing import normalize, StandardScaler
 from sklearn.utils import shuffle
 from keras.optimizers import Adam
-# import mne
+import mne
 from scipy import stats
 
 import ml_metrics
 import ml_models
 
-
-def mean(data):
-    return np.mean(data, axis=-1)
-
-
-def std(data):
-    return np.std(data, axis=-1)
-
-
-def ptp(data):
-    return np.ptp(data, axis=-1)
-
-
-def var(data):
-    return np.var(data, axis=-1)
-
-
-def minim(data):
-    return np.min(data, axis=-1)
-
-
-def maxim(data):
-    return np.max(data, axis=-1)
-
-
-def argminim(data):
-    return np.argmin(data, axis=-1)
-
-
-def argmaxim(data):
-    return np.argmax(data, axis=-1)
-
-
-def mean_square(data):
-    return np.mean(data ** 2, axis=-1)
-
-
-def rms(data):  # root mean square
-    return np.sqrt(np.mean(data ** 2, axis=-1))
-
-
-def abs_diffs_signal(data):
-    return np.sum(np.abs(np.diff(data, axis=-1)), axis=-1)
-
-
-def skewness(data):
-    return stats.skew(data, axis=-1)
-
-
-def kurtosis(data):
-    return stats.kurtosis(data, axis=-1)
-
-
-def concatenate_features(data):
-    return np.concatenate((mean(data),std(data),ptp(data),var(data),minim(data),maxim(data),argminim(data),argmaxim(data),
-                          mean_square(data),rms(data),abs_diffs_signal(data),
-                          skewness(data),kurtosis(data)),axis=-1)
-
-
 print("Num GPUs Available", len(tf.config.experimental.list_physical_devices('GPU')))
-# Use noise filtering for frequency early on
-# Use statistical features from sklearn on all channels
-# Reshape data for CNN implementation
 directory = "Data/Sync"
 type_dict = {
     "Simple": [
@@ -102,16 +40,15 @@ type_dict = {
         119
     ]
 }
-resolution = 1296
+resolution = 1295
 
 X_data = []
 Y_labels = []
 
-
 if __name__ == '__main__':
     X_data = []
     Y_labels = []
-    # info = mne.create_info(ch_names=['AF7', 'AF8', 'TP9', 'TP10'], ch_types=['eeg', 'eeg', 'eeg', 'eeg'], sfreq=255)
+    info = mne.create_info(ch_names=['AF7', 'AF8', 'TP9', 'TP10'], ch_types=['eeg', 'eeg', 'eeg', 'eeg'], sfreq=255)
 
     for difficulty in type_dict.keys():
         for pattern in type_dict[difficulty]:
@@ -124,9 +61,9 @@ if __name__ == '__main__':
                     eeg = np.array(eeg)
                     eeg.resize(4, 1296)
 
-                    # raw = mne.io.RawArray(eeg, info)
-                    # raw.set_eeg_reference()
-                    # raw.filter(l_freq=1, h_freq=45, filter_length=1295)
+                    raw = mne.io.RawArray(eeg, info)
+                    raw.set_eeg_reference()
+                    raw.filter(l_freq=1, h_freq=45, filter_length=1295)
 
                     X_data.append(eeg)
                     Y_labels.append(1)
@@ -139,7 +76,6 @@ if __name__ == '__main__':
     total_data = os.listdir(ntDir)
     for ntf in total_data:
         ntPath = f'{ntDir}/{ntf}'
-        print(ntPath)
         total_path = os.listdir(ntPath)
         for file in total_path:
             try:
@@ -147,52 +83,32 @@ if __name__ == '__main__':
                 data = pd.read_csv(f'{ntPath}/{file}')
                 eeg = [data.AF7, data.AF8, data.TP9, data.TP10]
                 eeg = np.array(eeg)
-                eeg.resize(4, 1296)
-
-                # for i in range(3):
-                #     noise = np.random.normal(loc=0, scale=1.5, size=(4, 1296))
-                #     aug_eeg = eeg + noise
-                #     # for j in range(4):
-                #     #     aug_eeg[j] = aug_eeg[j] + noise
-                #     # raw = mne.io.RawArray(aug_eeg, info)
-                #     # raw.set_eeg_reference()
-                #     # raw.filter(l_freq=1, h_freq=45, filter_length=1295)
-                #     X_data.append(aug_eeg)
-                #     Y_labels.append(0)
-
-                # raw = mne.io.RawArray(eeg, info)
-                # raw.set_eeg_reference()
-                # raw.filter(l_freq=1, h_freq=45, filter_length=1295)
-
-                X_data.append(eeg)
-                Y_labels.append(0)
+                print(eeg.shape)
+                if eeg.shape[1] < 1275:
+                    eeg = eeg.reshape(4, 1275)
+                    print("resized")
+                    print(eeg.shape)
+                raw = mne.io.RawArray(eeg, info)
+                raw.set_eeg_reference()
+                raw.filter(l_freq=1, h_freq=45)
+                epochs = mne.make_fixed_length_epochs(raw, duration=5)
+                eeg_pro = epochs.get_data()
+                for sig in eeg_pro:
+                    X_data.append(sig)
+                    Y_labels.append(0)
             except Exception as e:
                 print(e)
-                input()
+                continue
 
     Y_labels = np.array(Y_labels)
     X_data = np.array(X_data)
     X_data = np.moveaxis(X_data, 1, 2)
-    # selected_funcs = {'mean', 'ptp_amp', 'std'}
-    # X_data = concatenate_features(X_data)
-    # X_data = np.reshape(X_data, (1020, 4212, 4))
     print(X_data.shape)
     print(Y_labels.shape)
+
     objects = StandardScaler()
     print(f'Unique Labels: {len(np.unique(Y_labels))}')
     print("Starting Model")
-    # gkf = StratifiedKFold(n_splits=5, shuffle=True)
-    # accuracy = []
-    # for train_index, val_index in gkf.split(X_data, Y_labels):
-    #     train_features, train_labels = X_data[train_index], Y_labels[train_index]
-    #     val_features, val_labels = X_data[val_index], Y_labels[val_index]
-    #     scaler = StandardScaler()
-    #     train_features = scaler.fit_transform(train_features.reshape(-1, train_features.shape[-1])).reshape(
-    #         train_features.shape)
-    #     val_features = scaler.transform(val_features.reshape(-1, val_features.shape[-1])).reshape(val_features.shape)
-    #     model = ml_models.create_cnn_model(resolution)
-    #     model.fit(train_features, train_labels, epochs=50, batch_size=64, validation_data=(val_features, val_labels))
-    #     accuracy.append(model.evaluate(val_features, val_labels)[1])
 
     accuracies = []
     summary = ""
@@ -218,7 +134,7 @@ if __name__ == '__main__':
                 X_testC = X_data[test_mask]
                 y_testC = Y_labels[test_mask]
 
-                model2 = ml_models.create_cnn_model( resolution)
+                model2 = ml_models.create_cnn_model(resolution)
 
                 callback = EarlyStopping(
                     monitor='loss', min_delta=0.0005,
