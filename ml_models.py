@@ -49,20 +49,17 @@ def create_lstm_model(lr, dr, resolution):
 
 def create_cnn_model(resolution):
     model = Sequential()
-    model.add(Conv1D(filters=512, kernel_size=7, input_shape=(resolution, 4)))  # 1
+    model.add(Conv1D(filters=128, kernel_size=7, input_shape=(resolution, 4)))  # 1
+    model.add(LeakyReLU())
     model.add(MaxPool1D(pool_size=10))  # 2
-    model.add(Conv1D(filters=128, kernel_size=3))  # 3
+    model.add(Dropout(0.4))
+    model.add(Conv1D(filters=64, kernel_size=3))  # 3
     model.add(LeakyReLU())
     model.add(MaxPool1D(pool_size=10))  # 4
-    # model.add(Dropout(0.2))
-    # model.add(Conv1D(filters=64, kernel_size=3))  # 5
-    # # model.add(LeakyReLU())
-    # model.add(AveragePooling1D(pool_size=5))  # 6
-    # model.add(Dropout(0.2))
-    # model.add(Conv1D(filters=32, kernel_size=2))  # 7
+    model.add(Conv1D(filters=32, kernel_size=2))
     model.add(Flatten())
     model.add(Dense(2, activation='softmax'))  # 11
 
-    opt = Adam(learning_rate=0.001)
+    opt = Adam(learning_rate=0.0001)
     model.compile(opt, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     return model

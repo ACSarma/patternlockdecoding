@@ -40,7 +40,7 @@ type_dict = {
         119
     ]
 }
-resolution = 1295
+resolution = 1275
 
 X_data = []
 Y_labels = []
@@ -59,15 +59,14 @@ if __name__ == '__main__':
                     data = pd.read_csv(f'{directory}/{difficulty}{pattern}/{file}')
                     eeg = [data.AF7, data.AF8, data.TP9, data.TP10]
                     eeg = np.array(eeg)
-                    eeg.resize(4, 1296)
+                    eeg.resize(4, 1275)
 
                     raw = mne.io.RawArray(eeg, info)
                     raw.set_eeg_reference()
-                    raw.filter(l_freq=1, h_freq=45, filter_length=1295)
+                    raw.filter(l_freq=1, h_freq=45, filter_length=1275)
 
                     X_data.append(eeg)
                     Y_labels.append(1)
-
                 except Exception as e:
                     print(e)
                     input()
@@ -85,7 +84,7 @@ if __name__ == '__main__':
                 eeg = np.array(eeg)
                 print(eeg.shape)
                 if eeg.shape[1] < 1275:
-                    eeg = eeg.reshape(4, 1275)
+                    eeg.resize(4, 1275)
                     print("resized")
                     print(eeg.shape)
                 raw = mne.io.RawArray(eeg, info)
@@ -93,6 +92,7 @@ if __name__ == '__main__':
                 raw.filter(l_freq=1, h_freq=45)
                 epochs = mne.make_fixed_length_epochs(raw, duration=5)
                 eeg_pro = epochs.get_data()
+
                 for sig in eeg_pro:
                     X_data.append(sig)
                     Y_labels.append(0)
@@ -105,6 +105,7 @@ if __name__ == '__main__':
     X_data = np.moveaxis(X_data, 1, 2)
     print(X_data.shape)
     print(Y_labels.shape)
+    print(X_data.shape)
 
     objects = StandardScaler()
     print(f'Unique Labels: {len(np.unique(Y_labels))}')
@@ -137,8 +138,8 @@ if __name__ == '__main__':
                 model2 = ml_models.create_cnn_model(resolution)
 
                 callback = EarlyStopping(
-                    monitor='loss', min_delta=0.0005,
-                    patience=10)
+                    monitor='loss', min_delta=0.001,
+                    patience=5)
 
                 hist = model2.fit(X_trainC, y_trainC, epochs=200, callbacks=[callback])
                 y_predicted = model2.predict(X_testC)
@@ -149,14 +150,14 @@ if __name__ == '__main__':
                 cm = confusion_matrix(y_testC, y_predicted_labels)
                 ml_metrics.plot_confusion_matrix(cm, classes=range(10),
                                                  title='')
+
+                plt.show()
                 FP = cm.sum(axis=0) - np.diag(cm)
                 FN = cm.sum(axis=1) - np.diag(cm)
                 TP = np.diag(cm)
                 TN = cm.sum() - (FP + FN + TP)
                 FNR = FN / (TP + FN)
                 TPR = TP / (TP + FN)
-
-                plt.show()
 
                 accuracies2.append(acc)
                 if max(accuracies2) == acc:
@@ -176,7 +177,7 @@ if __name__ == '__main__':
 
     plt.show()
 
-    plt.plot(e_list, best_hist.history['sparse_categorical_accuracy'], label='Training Accuracy')
+    plt.plot(e_list, best_hist.history['accuracy'], label='Training Accuracy')
     plt.xlabel('Epochs')
     plt.ylabel('Accuracy')
     plt.legend()
