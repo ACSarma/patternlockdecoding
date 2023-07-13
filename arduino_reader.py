@@ -1,3 +1,10 @@
+'''
+Arun Sarma
+CSS700
+Preconditions: An Arduino w/ EMG electrodes is connected to the USB port of the device that this script runs on
+Purpose: This script starts a serial connection with the connected Arduino at baudrate 115200 and reads data until the key "q" is pressed. The data is saved into .csv files after the session ends
+'''
+
 import serial
 import keyboard
 import time
