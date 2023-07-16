@@ -21,9 +21,9 @@ from sklearn.utils import shuffle
 from keras.optimizers import Adam
 
 
-def create_lstm_model(lr, dr, resolution):
+def create_lstm_model(lr, dr, resolution, num_labels):
     model = Sequential()
-    model.add(LSTM(units=128, return_sequences=True, input_shape=(resolution, 4)))
+    model.add(LSTM(units=128, return_sequences=True, input_shape=(1, resolution)))
     model.add(Dropout(dr))
     model.add(LSTM(units=64, return_sequences=True))
     model.add(Dropout(dr))
@@ -33,33 +33,56 @@ def create_lstm_model(lr, dr, resolution):
     # model.add(LSTM(units=64, return_sequences=True))
     # model.add(Dropout(dr))
     # model.add(LSTM(units=32, return_sequences=True))
-    model.add(Dropout(dr))
-    model.add(Flatten())
-    model.add(Dense(units=6, activation='sigmoid'))
+    # model.add(Dropout(dr))
+    # model.add(Flatten())
+    model.add(Dense(units=num_labels, activation='sigmoid'))
 
     opt = Adam(learning_rate=lr)
     model.compile(
         loss='sparse_categorical_crossentropy',
         optimizer=opt,
-        metrics=['sparse_categorical_accuracy'],
+        metrics=['accuracy'],
     )
 
     return model
 
 
-def create_cnn_model(resolution):
+def create_cnn_model(lr, dr, resolution, num_labels):
     model = Sequential()
     model.add(Conv1D(filters=128, kernel_size=7, input_shape=(resolution, 4)))  # 1
     model.add(LeakyReLU())
     model.add(MaxPool1D(pool_size=10))  # 2
-    model.add(Dropout(0.4))
+    model.add(Dropout(dr))
     model.add(Conv1D(filters=64, kernel_size=3))  # 3
     model.add(LeakyReLU())
     model.add(MaxPool1D(pool_size=10))  # 4
+    model.add(Dropout(dr))
     model.add(Conv1D(filters=32, kernel_size=2))
+    model.add(LeakyReLU())
+    model.add(MaxPool1D(pool_size=10))  # 4
+    model.add(Dropout(dr))
+    model.add(Dense(16))
     model.add(Flatten())
-    model.add(Dense(2, activation='softmax'))  # 11
+    model.add(Dense(num_labels, activation='softmax'))  # 11
 
-    opt = Adam(learning_rate=0.0001)
+    opt = Adam(learning_rate=lr)
     model.compile(opt, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    return model
+
+
+def create_cnn_lstm_model(lr, dr, resolution, num_labels):
+    model = Sequential()
+    model.add(Conv1D(filters=128, kernel_size=7, input_shape=(resolution, 4)))  # 1
+    model.add(LeakyReLU())
+    model.add(MaxPool1D(pool_size=10))  # 2
+    model.add(Dropout(dr))
+    model.add(Conv1D(filters=64, kernel_size=3))  # 3
+    model.add(Dense(64))
+    model.add(LSTM(units=10, return_sequences=True, input_shape=(32, 4)))
+    model.add(Dropout(dr))
+    model.add(Flatten())
+    model.add(Dense(num_labels, activation='sigmoid'))
+
+    opt = Adam(learning_rate=lr)
+    model.compile(opt, loss='binary_crossentropy', metrics=['accuracy'])
     return model

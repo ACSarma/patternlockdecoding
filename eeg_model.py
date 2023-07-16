@@ -105,7 +105,6 @@ if __name__ == '__main__':
     X_data = np.moveaxis(X_data, 1, 2)
     print(X_data.shape)
     print(Y_labels.shape)
-    print(X_data.shape)
 
     objects = StandardScaler()
     print(f'Unique Labels: {len(np.unique(Y_labels))}')
@@ -114,7 +113,7 @@ if __name__ == '__main__':
     accuracies = []
     summary = ""
     drs = [0.4]  # dropout rates testing
-    lrs = [0.0001]  # learning rates testing
+    lrs = [0.00005]  # learning rates testing
     epochs = 200
     best_hist = None
 
@@ -135,8 +134,7 @@ if __name__ == '__main__':
                 X_testC = X_data[test_mask]
                 y_testC = Y_labels[test_mask]
 
-                # model2 = ml_models.create_cnn_model(resolution)
-                model2 = ml_models.create_lstm_model(c, r, resolution)
+                model2 = ml_models.create_cnn_model(lrs[c], drs[r], resolution, 2)
                 callback = EarlyStopping(
                     monitor='loss', min_delta=0.001,
                     patience=5)
