@@ -23,7 +23,7 @@ from keras.optimizers import Adam
 
 def create_lstm_model(lr, dr, resolution):
     model = Sequential()
-    model.add(LSTM(units=128, return_sequences=True, input_shape=(1, resolution)))
+    model.add(LSTM(units=128, return_sequences=True, input_shape=(resolution, 4)))
     model.add(Dropout(dr))
     model.add(LSTM(units=64, return_sequences=True))
     model.add(Dropout(dr))

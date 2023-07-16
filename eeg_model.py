@@ -135,8 +135,8 @@ if __name__ == '__main__':
                 X_testC = X_data[test_mask]
                 y_testC = Y_labels[test_mask]
 
-                model2 = ml_models.create_cnn_model(resolution)
-
+                # model2 = ml_models.create_cnn_model(resolution)
+                model2 = ml_models.create_lstm_model(c, r, resolution)
                 callback = EarlyStopping(
                     monitor='loss', min_delta=0.001,
                     patience=5)

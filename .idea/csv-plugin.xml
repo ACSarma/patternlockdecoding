@@ -3,13 +3,6 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="\Data\EEG_NT\Data\recording2.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="\Data\EEG_NT\d0\0EEG_recording_2021-08-07-05.14.09.csv">
           <value>
             <Attribute>
