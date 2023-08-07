@@ -21,27 +21,28 @@ from sklearn.utils import shuffle
 from keras.optimizers import Adam
 
 
-def create_lstm_model(lr, dr, resolution, num_labels):
+def create_lstm_model(lr, dr, resolution, num_labels, num_hidden):
+    curr_units = 32
+
     model = Sequential()
-    model.add(LSTM(units=128, return_sequences=True, input_shape=(1, resolution)))
-    model.add(Dropout(dr))
-    model.add(LSTM(units=64, return_sequences=True))
-    model.add(Dropout(dr))
-    # model.add(Dropout(dr))
-    # model.add(LSTM(units=128, return_sequences=True))
-    # model.add(Dropout(dr))
-    # model.add(LSTM(units=64, return_sequences=True))
-    # model.add(Dropout(dr))
-    # model.add(LSTM(units=32, return_sequences=True))
-    # model.add(Dropout(dr))
-    # model.add(Flatten())
+    model.add(LSTM(units=curr_units, return_sequences=True, input_shape=(1, resolution)))
+
+    for layer in range(num_hidden):
+        curr_units = curr_units / 2
+        model.add(LSTM(units=int(curr_units), return_sequences=True))
+        model.add(Dropout(dr))
+
+    curr_units = curr_units / 2
+    model.add(LSTM(units=int(curr_units), return_sequences=False))
+    model.add(Dense(units=12))
+    model.add(Flatten())
     model.add(Dense(units=num_labels, activation='sigmoid'))
 
     opt = Adam(learning_rate=lr)
     model.compile(
         loss='sparse_categorical_crossentropy',
         optimizer=opt,
-        metrics=['accuracy'],
+        metrics=['sparse_categorical_accuracy'],
     )
 
     return model

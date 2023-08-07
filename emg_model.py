@@ -47,10 +47,9 @@ if __name__ == '__main__':
             for file in total_data:
                 try:
                     data = pd.read_csv(f'{directory}/{difficulty}{pattern}/{file}')
-                    eeg = data.TP9
-                    emg = eeg
+                    emg = data.emg_signal
                     emg = normalize([emg])[0]
-                    emg = np.resize(emg, (resolution))
+                    emg = np.resize(emg, resolution)
                     emg = np.asarray(emg)
                     X_data.append(emg)
                     Y_labels.append(countlab)
@@ -77,6 +76,7 @@ if __name__ == '__main__':
     summary = ""
     drs = [0.4]  # dropout rates testing
     lrs = [0.0001]  # learning rates testing
+    hls = [1, 2, 3, 4, 5]
     epochs = 200
     best_hist = None
 
@@ -85,48 +85,49 @@ if __name__ == '__main__':
     # X_data = X_data[s]
     # Y_labels = Y_labels[s]
     # GridSearch with Cross Validation
-    for r in range(len(drs)):
-        for c in range(len(lrs)):
-            kfolds = KFold(n_splits=5, shuffle=True, random_state=0)
-            accuracies1 = []
-            accuracies2 = []
-            for train_mask, test_mask in kfolds.split(X_data, Y_labels):
-                X_trainC = X_data[train_mask]
-                y_trainC = Y_labels[train_mask]
+    for h in range(len(hls)):
+        for r in range(len(drs)):
+            for c in range(len(lrs)):
+                kfolds = KFold(n_splits=5, shuffle=True, random_state=0)
+                accuracies1 = []
+                accuracies2 = []
+                for train_mask, test_mask in kfolds.split(X_data, Y_labels):
+                    X_trainC = X_data[train_mask]
+                    y_trainC = Y_labels[train_mask]
 
-                X_testC = X_data[test_mask]
-                y_testC = Y_labels[test_mask]
+                    X_testC = X_data[test_mask]
+                    y_testC = Y_labels[test_mask]
 
-                model2 = ml_models.create_lstm_model(lrs[c], drs[r], resolution)
+                    model2 = ml_models.create_lstm_model(lrs[c], drs[r], resolution, 6, hls[h])
 
-                callback = EarlyStopping(
-                    monitor='sparse_categorical_accuracy', min_delta=0.0005,
-                    patience=10)
+                    callback = EarlyStopping(
+                        monitor='sparse_categorical_accuracy', min_delta=0.001,
+                        patience=10)
 
-                hist = model2.fit(X_trainC, y_trainC, epochs=200, callbacks=[callback])
-                y_predicted = model2.predict(X_testC)
-                y_predicted_labels = [np.argmax(i) for i in y_predicted]
-                acc = metrics.accuracy_score(y_testC, y_predicted_labels)
-                print("Accuracy on Test: ", acc)
+                    hist = model2.fit(X_trainC, y_trainC, epochs=200, callbacks=[callback])
+                    y_predicted = model2.predict(X_testC)
+                    y_predicted_labels = [np.argmax(i) for i in y_predicted]
+                    acc = metrics.accuracy_score(y_testC, y_predicted_labels)
+                    print("Accuracy on Test: ", acc)
 
-                cm = confusion_matrix(y_testC, y_predicted_labels)
-                ml_metrics.plot_confusion_matrix(cm, classes=range(10),
-                                      title='')
-                FP = cm.sum(axis=0) - np.diag(cm)
-                FN = cm.sum(axis=1) - np.diag(cm)
-                TP = np.diag(cm)
-                TN = cm.sum() - (FP + FN + TP)
-                FNR = FN / (TP + FN)
-                TPR = TP / (TP + FN)
+                    cm = confusion_matrix(y_testC, y_predicted_labels)
+                    # ml_metrics.plot_confusion_matrix(cm, classes=range(10),
+                    #                       title='')
+                    FP = cm.sum(axis=0) - np.diag(cm)
+                    FN = cm.sum(axis=1) - np.diag(cm)
+                    TP = np.diag(cm)
+                    TN = cm.sum() - (FP + FN + TP)
+                    FNR = FN / (TP + FN)
+                    TPR = TP / (TP + FN)
 
-                plt.show()
+                    # plt.show()
 
-                accuracies2.append(acc)
-                if max(accuracies2) == acc:
-                    best_hist = hist
+                    accuracies2.append(acc)
+                    if max(accuracies2) == acc:
+                        best_hist = hist
 
-                summary += f'Dropout: {drs[r]}, Learning Rate: {lrs[c]}; Accuracy: {acc} - {datetime.datetime.now()}; FNR: {FNR}; TPR: {TPR} \n'
-            print(accuracies2, "\nAverage Accuracy: ", np.average(accuracies2))
+                    summary += f'Hidden Layers: {hls[h]}, Dropout: {drs[r]}, Learning Rate: {lrs[c]}; Accuracy: {acc} - {datetime.datetime.now()}; FNR: {FNR}; TPR: {TPR} \n'
+                print(accuracies2, "\nAverage Accuracy: ", np.average(accuracies2))
 
     e_list = []
     for i in range(len(best_hist.history['loss'])):
