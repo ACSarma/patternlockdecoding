@@ -48,20 +48,21 @@ def create_lstm_model(lr, dr, resolution, num_labels, num_hidden):
     return model
 
 
-def create_cnn_model(lr, dr, resolution, num_labels):
+def create_cnn_model(lr, dr, resolution, num_labels, num_hidden):
+    curr_units = 256
+
     model = Sequential()
-    model.add(Conv1D(filters=128, kernel_size=7, input_shape=(resolution, 4)))  # 1
+    model.add(Conv1D(filters=curr_units, kernel_size=7, input_shape=(resolution, 4)))  # 1
     model.add(LeakyReLU())
     model.add(MaxPool1D(pool_size=10))  # 2
     model.add(Dropout(dr))
-    model.add(Conv1D(filters=64, kernel_size=3))  # 3
-    model.add(LeakyReLU())
-    model.add(MaxPool1D(pool_size=10))  # 4
-    model.add(Dropout(dr))
-    model.add(Conv1D(filters=32, kernel_size=2))
-    model.add(LeakyReLU())
-    model.add(MaxPool1D(pool_size=10))  # 4
-    model.add(Dropout(dr))
+
+    for layer in range(0, num_hidden):
+        model.add(Conv1D(filters=int(curr_units), kernel_size=2))  # 3
+        model.add(LeakyReLU())
+        model.add(MaxPool1D(pool_size=2))  # 4
+        model.add(Dropout(dr))
+
     model.add(Dense(16))
     model.add(Flatten())
     model.add(Dense(num_labels, activation='softmax'))  # 11
