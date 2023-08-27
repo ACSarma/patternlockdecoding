@@ -74,9 +74,10 @@ if __name__ == '__main__':
 
     accuracies = []
     summary = ""
-    drs = [0.4]  # dropout rates testing
-    lrs = [0.0001]  # learning rates testing
-    hls = [1, 2, 3, 4, 5]
+    summaryAvg = ""
+    drs = [0, 0.2, 0.4]  # dropout rates testing
+    lrs = [0.01, 0.001, 0.0001]  # learning rates testing
+    hls = [0]
     epochs = 200
     best_hist = None
 
@@ -127,7 +128,8 @@ if __name__ == '__main__':
                         best_hist = hist
 
                     summary += f'Hidden Layers: {hls[h]}, Dropout: {drs[r]}, Learning Rate: {lrs[c]}; Accuracy: {acc} - {datetime.datetime.now()}; FNR: {FNR}; TPR: {TPR} \n'
-                print(accuracies2, "\nAverage Accuracy: ", np.average(accuracies2))
+                print(accuracies2, "\nAverage Accuracy: ", np.average(accuracies2), "Hidden Layers: ", hls[h])
+                summaryAvg += f'Hidden Layers: {hls[h]}, Dropout: {drs[r]}, Learning Rate: {lrs[c]}; Accuracy: {np.average(accuracies2)} - {datetime.datetime.now()} \n'
 
     e_list = []
     for i in range(len(best_hist.history['loss'])):
@@ -147,4 +149,4 @@ if __name__ == '__main__':
 
     plt.show()
 
-    print(summary)
+    print(summaryAvg)
