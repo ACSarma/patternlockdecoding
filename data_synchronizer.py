@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import os.path
 from datetime import timedelta
 import matplotlib.pyplot as plt
 
@@ -19,14 +20,16 @@ def sync_lines(dfEMGsession):
         dfPatterns = pd.read_csv(f'{subdirPath}/Session{len(os.listdir(subdirPath)) - 1}.csv')
         index = len(os.listdir(f'{synced_dir}/Lines/{subdir}'))
         for ind, row in dfPatterns.iterrows():
-            sTime = (float(row['start']) * 0.001)
-            eTime = float(row[' end']) * 0.001
-            dfSub = dfEMGsession[(dfEMGsession['timestamps'] >= sTime) & (dfEMGsession['timestamps'] <= eTime)]
-            if not dfSub.empty:
-                dfSub.to_csv(f'{synced_dir}/Lines/{subdir}/Lines{index}.csv')
+            if os.path.isfile(f'{synced_dir}/Lines/{subdir}/Lines{index}.csv'):
                 index = index + 1
+                continue
             else:
-                print("empty")
+                sTime = (float(row['start']) * 0.001)
+                eTime = float(row[' end']) * 0.001
+                dfSub = dfEMGsession[(dfEMGsession['timestamps'] >= sTime) & (dfEMGsession['timestamps'] <= eTime)]
+                if not dfSub.empty:
+                    dfSub.to_csv(f'{synced_dir}/Lines/{subdir}/Lines{index}.csv')
+                    index = index + 1
 
 
 def sync_normal(dfEMG):
