@@ -25,6 +25,7 @@ def readserial(comport, baudrate):
         if keyboard.is_pressed("q"):
             qdata = pd.DataFrame(data=df_record, columns=columns)
             qdata.to_csv(f'{directory}/EMG{len(os.listdir(directory))}.csv', index=False)
+            print(f'{directory}/EMG{len(os.listdir(directory))-1}.csv')
             return
         data = ser.readline().decode().strip()
         if data:
