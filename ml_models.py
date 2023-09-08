@@ -22,7 +22,7 @@ from keras.optimizers import Adam
 
 
 def create_lstm_model(lr, dr, resolution, num_labels, num_hidden):
-    curr_units = 128
+    curr_units = 512
 
     model = Sequential()
     model.add(LSTM(units=curr_units, return_sequences=True, input_shape=(1, resolution)))
@@ -34,7 +34,7 @@ def create_lstm_model(lr, dr, resolution, num_labels, num_hidden):
 
     curr_units = curr_units / 2
     model.add(LSTM(units=int(curr_units), return_sequences=False))
-    model.add(Dense(units=12))
+    model.add(Dense(units=36))
     model.add(Flatten())
     model.add(Dense(units=num_labels, activation='sigmoid'))
 
@@ -69,6 +69,28 @@ def create_cnn_model(lr, dr, resolution, num_labels, num_hidden):
 
     opt = Adam(learning_rate=lr)
     model.compile(opt, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    return model
+
+
+def create_dense_model(lr, dr, resolution, num_labels, num_hidden):
+    curr_units = 1000
+    model = Sequential()
+    model.add(Dense(curr_units, input_shape=(1, resolution)))
+    model.add(Dropout(dr))
+    model.add(Dense(curr_units / 2))
+    model.add(Dropout(dr))
+    model.add(Dense(curr_units / 4))
+    model.add(Dropout(dr))
+    model.add(Dense(curr_units / 8))
+    model.add(Dropout(dr))
+    model.add(Dense(num_labels, activation='sigmoid'))
+
+    opt = Adam(learning_rate=lr)
+    model.compile(
+        loss='sparse_categorical_crossentropy',
+        optimizer=opt,
+        metrics=['sparse_categorical_accuracy'],
+    )
     return model
 
 

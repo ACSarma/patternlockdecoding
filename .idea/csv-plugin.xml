@@ -52,6 +52,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\Data\Sync\Lines\Line0\Lines2.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\Data\Sync\Medium_Complex70\Medium_Complex70_EEG20.csv">
           <value>
             <Attribute>
