@@ -7,9 +7,11 @@ import matplotlib.pyplot as plt
 eeg_dir = "Data/EEG"
 emg_dir = "Data/EMG"
 lines_dir = "Data/Lines"
+patt_dir = "Data/PatternsV2"
 eeg_files = os.listdir(eeg_dir)
 emg_files = os.listdir(emg_dir)
 lines_files = os.listdir(lines_dir)
+patt_files = os.listdir(patt_dir)
 synced_dir = "Data/Sync"
 
 
@@ -35,8 +37,8 @@ def sync_lines(dfEMGsession):
 
 def sync_patterns(dfEMGsession):
     dfEMGsession = dfEMGsession.sort_values('timestamps')
-    for subdir in os.listdir(lines_dir):
-        subdirPath = f'{lines_dir}/{subdir}'
+    for subdir in os.listdir(patt_dir):
+        subdirPath = f'{patt_dir}/{subdir}'
         dfPatterns = pd.read_csv(f'{subdirPath}/Session{len(os.listdir(subdirPath)) - 1}.csv')
         index = len(os.listdir(f'{synced_dir}/{subdir}'))
         for ind, row in dfPatterns.iterrows():
@@ -69,5 +71,6 @@ def sync_normal(dfEMG):
 if __name__ == '__main__':
     print(f'Reading: {emg_dir}/EMG{len(emg_files) - 1}.csv')
     df = pd.read_csv(f'{emg_dir}/EMG{len(emg_files) - 1}.csv')
-    sync_lines(df)
+    sync_patterns(df)
+    # sync_lines(df)
     # sync_normal(df)
