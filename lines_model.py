@@ -56,9 +56,9 @@ if __name__ == '__main__':
     accuracies = []
     summary = ""
     summaryAvg = ""
-    drs = [0.5]  # dropout rates testing
-    lrs = [0.001]  # learning rates testing
-    hls = [1]
+    drs = [0, 0.4]  # dropout rates testing
+    lrs = [0.01, 0.005, 0.0005]  # learning rates testing
+    hls = [1, 2, 3]
     epochs = 200
     best_hist = None
 

@@ -44,6 +44,7 @@ if __name__ == '__main__':
         for pattern in type_dict[difficulty]:
             total_data = os.listdir(f'{directory}/{difficulty}{pattern}')
             total_data.reverse()
+            counting = 0
             for file in total_data:
                 try:
                     data = pd.read_csv(f'{directory}/{difficulty}{pattern}/{file}')
@@ -53,8 +54,11 @@ if __name__ == '__main__':
                     emg = np.asarray(emg)
                     X_data.append(emg)
                     Y_labels.append(countlab)
+                    X_data.append(emg)
+                    Y_labels.append(countlab)
                 except Exception as e:
                     print(e)
+                counting = counting + 1
             countlab = countlab + 1
 
     Y_labels = np.array(Y_labels)
@@ -75,9 +79,9 @@ if __name__ == '__main__':
     accuracies = []
     summary = ""
     summaryAvg = ""
-    drs = [0, 0.2, 0.4]  # dropout rates testing
-    lrs = [0.01, 0.001, 0.0001]  # learning rates testing
-    hls = [0]
+    drs = [0.4]  # dropout rates testing
+    lrs = [0.0005]  # learning rates testing
+    hls = [3]
     epochs = 200
     best_hist = None
 
@@ -89,7 +93,7 @@ if __name__ == '__main__':
     for h in range(len(hls)):
         for r in range(len(drs)):
             for c in range(len(lrs)):
-                kfolds = KFold(n_splits=5, shuffle=True, random_state=0)
+                kfolds = KFold(n_splits=4, shuffle=True, random_state=0)
                 accuracies1 = []
                 accuracies2 = []
                 for train_mask, test_mask in kfolds.split(X_data, Y_labels):
@@ -102,7 +106,7 @@ if __name__ == '__main__':
                     model2 = ml_models.create_lstm_model(lrs[c], drs[r], resolution, 6, hls[h])
 
                     callback = EarlyStopping(
-                        monitor='sparse_categorical_accuracy', min_delta=0.001,
+                        monitor='sparse_categorical_accuracy', min_delta=0.0001,
                         patience=10)
 
                     hist = model2.fit(X_trainC, y_trainC, epochs=200, callbacks=[callback])

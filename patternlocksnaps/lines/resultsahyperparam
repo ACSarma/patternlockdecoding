@@ -1,0 +1,19 @@
+Average Accuracy:  0.8156998335254194 Hidden Layers:  3
+Hidden Layers: 1, Dropout: 0, Learning Rate: 0.01; Accuracy: 0.29467750885730143 - 2023-09-10 17:54:07.890722 
+Hidden Layers: 1, Dropout: 0, Learning Rate: 0.005; Accuracy: 0.5569381482904341 - 2023-09-10 18:00:42.134127 
+Hidden Layers: 1, Dropout: 0, Learning Rate: 0.0005; Accuracy: 0.8758744184061126 - 2023-09-10 18:11:25.810525 
+Hidden Layers: 1, Dropout: 0.4, Learning Rate: 0.01; Accuracy: 0.3621313014897341 - 2023-09-10 18:14:51.583013 
+Hidden Layers: 1, Dropout: 0.4, Learning Rate: 0.005; Accuracy: 0.5405847953216375 - 2023-09-10 18:21:25.242672 
+Hidden Layers: 1, Dropout: 0.4, Learning Rate: 0.0005; Accuracy: 0.8329525760874205 - 2023-09-10 18:31:11.349344 
+Hidden Layers: 2, Dropout: 0, Learning Rate: 0.01; Accuracy: 0.24881205446706792 - 2023-09-10 18:35:52.039258 
+Hidden Layers: 2, Dropout: 0, Learning Rate: 0.005; Accuracy: 0.5166419089085243 - 2023-09-10 18:43:40.410260 
+Hidden Layers: 2, Dropout: 0, Learning Rate: 0.0005; Accuracy: 0.8536773807999317 - 2023-09-10 18:54:28.338602 
+Hidden Layers: 2, Dropout: 0.4, Learning Rate: 0.01; Accuracy: 0.2908857301404363 - 2023-09-10 18:58:28.659226 
+Hidden Layers: 2, Dropout: 0.4, Learning Rate: 0.005; Accuracy: 0.49531651513211256 - 2023-09-10 19:04:41.868737 
+Hidden Layers: 2, Dropout: 0.4, Learning Rate: 0.0005; Accuracy: 0.8279792547061084 - 2023-09-10 19:16:37.893981 
+Hidden Layers: 3, Dropout: 0, Learning Rate: 0.01; Accuracy: 0.2219528748879498 - 2023-09-10 19:20:28.564572 
+Hidden Layers: 3, Dropout: 0, Learning Rate: 0.005; Accuracy: 0.4278541853416997 - 2023-09-10 19:27:22.033796 
+Hidden Layers: 3, Dropout: 0, Learning Rate: 0.0005; Accuracy: 0.8259358859435693 - 2023-09-10 19:40:31.044975 
+Hidden Layers: 3, Dropout: 0.4, Learning Rate: 0.01; Accuracy: 0.2713305160711999 - 2023-09-10 19:45:11.544411 
+Hidden Layers: 3, Dropout: 0.4, Learning Rate: 0.005; Accuracy: 0.43574934904170404 - 2023-09-10 19:51:38.194709 
+Hidden Layers: 3, Dropout: 0.4, Learning Rate: 0.0005; Accuracy: 0.8156998335254194 - 2023-09-10 20:07:22.515732 
