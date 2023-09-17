@@ -16,4 +16,13 @@ Hidden Layers: 3, Dropout: 0, Learning Rate: 0.005; Accuracy: 0.4278541853416997
 Hidden Layers: 3, Dropout: 0, Learning Rate: 0.0005; Accuracy: 0.8259358859435693 - 2023-09-10 19:40:31.044975 
 Hidden Layers: 3, Dropout: 0.4, Learning Rate: 0.01; Accuracy: 0.2713305160711999 - 2023-09-10 19:45:11.544411 
 Hidden Layers: 3, Dropout: 0.4, Learning Rate: 0.005; Accuracy: 0.43574934904170404 - 2023-09-10 19:51:38.194709 
-Hidden Layers: 3, Dropout: 0.4, Learning Rate: 0.0005; Accuracy: 0.8156998335254194 - 2023-09-10 20:07:22.515732 
+Hidden Layers: 3, Dropout: 0.4, Learning Rate: 0.0005; Accuracy: 0.8156998335254194 - 2023-09-10 20:07:22.515732
+
+Post augmentation
+
+Hidden Layers: 1, Dropout: 0, Learning Rate: 0.0005; Accuracy: 0.9329275972110675 - 2023-09-16 19:53:38.335533
+Hidden Layers: 1, Dropout: 0.4, Learning Rate: 0.0005; Accuracy: 0.9024523746911255 - 2023-09-16 20:16:55.901362
+Hidden Layers: 2, Dropout: 0, Learning Rate: 0.0005; Accuracy: 0.9361376176566051 - 2023-09-16 20:40:27.466126
+Hidden Layers: 2, Dropout: 0.4, Learning Rate: 0.0005; Accuracy: 0.9246497369088147 - 2023-09-16 21:06:30.604434
+Hidden Layers: 3, Dropout: 0, Learning Rate: 0.0005; Accuracy: 0.93088124293705 - 2023-09-16 21:33:20.110155
+Hidden Layers: 3, Dropout: 0.4, Learning Rate: 0.0005; Accuracy: 0.9222195372153793 - 2023-09-16 22:08:40.035662

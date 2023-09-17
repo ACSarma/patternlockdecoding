@@ -1,4 +1,5 @@
 import datetime
+import math
 import os
 import re
 
@@ -14,12 +15,14 @@ from sklearn.preprocessing import normalize, StandardScaler
 
 import ml_metrics
 import ml_models
+import augment_emg
 
 directory = "Data/Sync/Lines"
 
 X_data = []
 Y_labels = []
 resolution = 100
+num_augmented = 5
 
 if __name__ == '__main__':
     lines = os.listdir(f'{directory}')
@@ -30,13 +33,21 @@ if __name__ == '__main__':
         for sample in os.listdir(line_data):
             data = pd.read_csv(f'{line_data}/{sample}')
             emg = data.emg_signal
-            # emg = normalize([emg])[0]
-            emg = np.asarray(emg)
+            emg = np.asarray(emg, dtype='float')
             emg = np.resize(emg, resolution)
+
+            snr = np.mean(emg) / np.std(emg)
+            power = np.sum(np.abs(emg)) / len(emg)
+            std = math.sqrt(power / snr)
+            for i in range(num_augmented):
+                noise = np.random.normal(0, std, len(emg))
+                new_sig = emg + noise
+                new_sig = np.asarray(new_sig)
+                X_data.append(new_sig)
+                Y_labels.append(label)
+            # emg = normalize([emg])[0]
             X_data.append(emg)
-            X_data.append(emg)
-            Y_labels.append((label))
-            Y_labels.append((label))
+            Y_labels.append(label)
 
     Y_labels = np.array(Y_labels)
     X_data = np.stack(X_data, axis=0)
@@ -57,7 +68,7 @@ if __name__ == '__main__':
     summary = ""
     summaryAvg = ""
     drs = [0, 0.4]  # dropout rates testing
-    lrs = [0.01, 0.005, 0.0005]  # learning rates testing
+    lrs = [0.0005]  # learning rates testing
     hls = [1, 2, 3]
     epochs = 200
     best_hist = None
