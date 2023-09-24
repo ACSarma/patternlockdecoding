@@ -45,9 +45,13 @@ if __name__ == '__main__':
                 new_sig = np.asarray(new_sig)
                 X_data.append(new_sig)
                 Y_labels.append(label)
+                plt.plot(new_sig)
             # emg = normalize([emg])[0]
             X_data.append(emg)
             Y_labels.append(label)
+
+            plt.plot(emg)
+            plt.show()
 
     Y_labels = np.array(Y_labels)
     X_data = np.stack(X_data, axis=0)

@@ -49,6 +49,34 @@ def create_lstm_model(lr, dr, resolution, num_labels, num_hidden):
     return model
 
 
+def create_lstm_model1(lr, dr, resolution, num_labels, num_hidden):
+    curr_units = 2048
+
+    model = Sequential()
+    model.add(LSTM(units=curr_units, return_sequences=True, input_shape=(1, resolution)))
+
+    for layer in range(num_hidden):
+        curr_units = curr_units / 2
+        model.add(LSTM(units=int(curr_units), return_sequences=True))
+        model.add(Dropout(dr))
+
+    curr_units = curr_units / 2
+    model.add(LSTM(units=int(curr_units), return_sequences=False))
+    model.add(Dense(units=36))
+    model.add(Dense(units=16))
+    model.add(Flatten())
+    model.add(Dense(units=num_labels, activation='sigmoid'))
+
+    opt = Adam(learning_rate=lr)
+    model.compile(
+        loss='sparse_categorical_crossentropy',
+        optimizer=opt,
+        metrics=['sparse_categorical_accuracy'],
+    )
+
+    return model
+
+
 def create_cnn_model(lr, dr, resolution, num_labels, num_hidden):
     curr_units = 256
 
