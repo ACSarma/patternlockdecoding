@@ -1,0 +1,306 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+		T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+  
+\begin{document}
+
+\title{Inferring User Passwords through EEG Signals}
+\author{Arun Sarma}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+In recent times, wearable Internet of Things (IoT) devices such as brain-sensing headsets have risen in popularity for their ability to reveal insights on users’ well-being. These devices record Electroencephalography (EEG) signals, which are used in medical settings to monitor an individual’s brain activity. Affordable EEG headsets make this technology more accessible to the general public. However, devices like these have security vulnerabilities which hackers can exploit to intercept users' EEG data. Recent papers have shown that EEG signals can be processed and fed through machine learning to infer user conditions or activity such as muscle movement, emotions or limited keyboard entry.
+In this paper, we explore how specifically deep learning can be used to infer the digits and words typed on a keyboard through a person’s recorded EEG signals with high accuracy. If deep learning techniques can be used to infer user activity from the EEG signals, then these predictions can expose sensitive and private user information such as password entry. 
+Our contributions include demonstrating an attack model by creating and comparing different deep learning models to infer what digits and words a person, wearing an EEG headset, typed on a keyboard. In this process, we show how raw EEG signals can be read from a consumer grade EEG headset. To process the raw EEG signals, we implement a series of noise filters and signal transformations to refine the signal samples before developing and testing on both CNN and RNN model for EEG signal classification to infer passwords.
+
+\end{abstract}
+
+\section{Introduction}
+
+Electroencephalogram (EEG) tests are used exclusively in medical domains to measure the physiological state of patients and diagnose conditions such as epilepsy, stroke, and developmental disorders. The test relies on using expensive Brain Computer Interfaces (BCI) to  record EEG signals which represent voltage fluctuations in various regions of the brain. However, BCIs are becoming more accessible to regular consumers in the form of EEG headsets. Companies such as InterAxon, Emotiv, and Neurosky mass produce relatively affordable EEG headsets and associated software for home-use. These EEG headsets record raw EEG signals and often send the information to an external client, such as a mobile app or server, for processing to provide users with interesting insights on how their body is functioning. BCI software applications have also been developed to enhance the utility of these EEG headsets by delivering gaming experiences and the ability to control peripherals. Given the rise in demand for immersive, connected experiences, and the wide range of uses for EEG headsets, this technology will increase in popularity.
+Therefore, it is important to study the implications of the potential security vulnerabilities of EEG headsets. Individuals or organizations with malicious intent may be interested in using this technology to mine information from EEG headset users. A study by Y. Xiao et al. [6] has demonstrated an existing vulnerability with a specific EEG headset which can lead to raw EEG data being collected by an unauthorized user. The attack involves intercepting the connection between the headset and the BCI application unbeknown to the user. This study also attempted to infer simple human activities by using a Deep Neural Network trained on EEG data of various participants. Similarly, deep learning has been used to study how to infer images that a person sees by training models on EEG and labeled images [9]. A study by Neupane et al. [3] studied the feasibility of inferring keystrokes (4-digit PINs or 6-character passwords) from EEG signals recorded by EEG headsets by using machine learning classifiers. 
+A number of studies have been conducted to create models which infer various types of user activity from EEG signals. However, the activities studied such as muscle movement, sight, or mental state do not present a real security risk to EEG headset users if inferred. Studies that have attempted to infer more sensitive activities such as keystrokes do not achieve significantly high model performance, limit their keyboard entry,  or use EEG recording devices that are not accessible to the general public. An activity which is harmful if exposed by a malicious individual with high accuracy, is the activity of entering passwords on a keyboard. Our study focuses on a scenario where the user’s passwords, which vary in length and use both characters and digits, are inferred from EEG recordings while the user is wearing the EEG headset. The user’s recognition of the keyboard characters via visual and language processing would be correlated with the typing of the password.
+Based on this, our study aims to study the vulnerability and demonstrate the feasibility of creating a deep learning model to decode EEG recordings of a person with high accuracy. This provides a basis for how to strengthen IoT devices that collect health-related sensory data. deep learning has been used in other applications to learn complex relationships in various types of data including time series such as EEG signals; however, using deep learning to infer sensitive user information such as thoughts, typing, and writing has not been thoroughly explored yet using very lightweight, affordable, consumer-grade EEG recording devices such as the InterAxon MUSE2 Brain-sensing Headband.
+
+\subsection{Our Contribution}
+In our study, we introduce an attack vector which infers a diverse set of typed passwords from users' covertly intercepted EEG signals. In this process, we explore how the EEG data can be processed by a deep learning model to expose various passwords typed on a keyboard. The passwords are of varying length and words that contain both numbers and letters. Our contributions are as follows:
+\begin{itemize}
+    \item We design and develop two deep learning Models, a Convolutional Neural Network (CNN) and a Recurrent Neural Network (RNN), to decode EEG signals.
+    \item We evaluate our models on a collected dataset from the InterAxon MUSE2 brain-sensing headband and compare metrics to see which model can predict best the text that was typed during the EEG recording.
+\end{itemize}
+
+\textbf{InterAxon MUSE2 Brain-sensing Headband:} The MUSE2 is a EEG headset that measures 4 EEG channels (AF7, AF8, TP9, TP10) at 256Hz. The MUSE2 is lightweight and can connect to a mobile device or a computer via Bluetooth.
+
+\section{Related Work}
+Much of literature on classifying EEG signals are focused on medical or accessibility applications; however, there has been an increasing interest in implementing models to analyze signals to enhance BCIs, or to retrieve information through brain activations. A study by Y. Xiao [6] not only revealed how a malicious BCI app can also be used to directly receive raw signal data, but also demonstrated a deep learning model that can be used to infer user activity. This model consisted of combining the outputs from separate RNN and CNN models using a feed-forward network. They trained this model on a dataset from Neurosky which consisted of human activities such as reading instructions, solving math problems, thinking of an item, blinking, etc. and achieved a significantly high accuracy relative to prior models. While this study made great strides in developing a model to train on a EEG dataset of human activity, the activities inferred did not directly contain sensitive information. If feasible, hackers can intercept raw EEG data and can potentially infer activity such as a user’s personal preferences, medical conditions, thoughts and even keyboard entry which can undermine the users’ privacy. A similar study to ours, attempted to predict subjects’ PINs by using classifiers [3]. To collect data, they held trials where participants would type randomly generated PINs. The participants’ EEG signals would be recorded by the Emotiv Epoch and the B-Alert Headset. The signals were preprocessed using a bandpass filter from 5 - 25 Hz, Independent Component Analysis (ICA), 6th order Autoregressive Coefficients, and built a set of classifiers to predict the digits the participants typed. While this study greatly improved the classification accuracy of keystrokes using EEG signals, deep learning techniques may have improved their results for a true-positive rate of higher than 50\%. In addition, this study used a 14-channel EEG headset from Emotiv which needed calibration before data collection to improve the noise-to-signal ratio. However, in a real-world setting this type of calibration is unlikely to be done by the consumer and lighter, more affordable headsets with fewer channels, such as the InterAxon MUSE2, may also be preferred.Various studies have made strides in using deep learning to extract information about more complex human activities and conditions. Spampinato et al. [9] studied how to use Long-Short Term Memory (LSTM) cells to translate multichannel EEG signals into a 1-D feature vector to enhance computer vision models to enhance a CNN based image classification system. This work highlights the potential of using deep learning techniques to process EEG signal data to infer activity such as an image a person was seeing. This research was based on the ImageNET dataset which contains hundreds of thousands of images and corresponding EEG signals. In addition, Agarwal et al. [5] demonstrated how phishing advertisements can be created to infer user preferences and their associations from measuring the Event-Related Potentials (ERP) when the subjects were presented with images of familiar places. These studies explore inferring information that can be sensitive in certain situations; however, it is unclear if similar results could be obtained on consumer-grade EEG headsets with significantly fewer channels. Apart from using deep learning to infer activity from EEG signals, some studies have explored methods of processing EEG data for better model performance. Sjamsudin [2] studied various feature extraction techniques such as Discrete Fourier Transform (DFT), Zero Crossing Rate (ZCR), and Hjorth Parameters that can be used in a setting where machine learning can be used to classify EEG signals. In addition, studies have been done on inferring user state with EEG signals by solely classifying the different types of waves present in the EEG signals. These can be used to infer user conditions such as mental state, emotion, or a medical condition such as epilepsy [1]. A lot of studies use machine learning techniques like Support Vector Machines (SVM) or simple Artificial Neural Networks (ANN) to classify different states from EEG signals. Similarly, Bashivan et al. [8] explored how to better process EEG signals for input into CNNs by converting the time series into multispectral images using Fast Fourier Transform (FFT) and projecting the 3D map of the electrodes onto a 2D surface. For smaller datasets, data augmentation techniques such as amplifying and shifting the signal by certain factors are used to increase the accuracy of machine-learning based models that process EEG data [7].  deep learning has been used in other applications where EEG signals are an input. To do this, Continuous Wavelet Transforms (CWT) were created to represent the raw or filtered signal in an image format which then can be inputted to a deep learning model; for example, CWTs were used to transform EEG signals to determine whether a subject was blinking or not [1].
+
+\section{Threat Model}
+The hacker’s motivation for collecting raw EEG signals is to reveal sensitive information that a user has entered on a keyboard. This can be achieved via a malicious BCI app which captures EEG signals and keystrokes, unbeknownst to the wearer of the EEG headset. Building a malicious BCI app to intercept EEG data from consumer devices or using intercepted EEG signals to infer sensitive information has been demonstrated in previous works [3, 6]. Our threat model consists of a hacker exposing a BCI user's typed input such as passwords via processing intercepted EEG signals recorded during the typing event. The hacker can take the intercepted signals and use a deep learning model trained on the EEG signals to infer typed characters or passwords.
+
+\section{The Proposed Approach}
+To demonstrate our threat model of exposing passwords from EEG data, we devise a simulation where a EEG signals are recorded while a user enters memorized passwords and single characters. In our simulation, we have two assumptions: the hacker has established a method of intercepting raw EEG signals from the headset and logging keystrokes, and that the visual recognition of the keys on the keyboard and recognition of language can reveal the password entered. We then propose two deep learning models to infer passwords from the recorded EEG signals.
+
+\subsection{Task Design}
+We followed a single design (see Figure 1); however, we varied the data type (digits, characters, passwords) and data augmentation methods. For all data types, we used an EEG headset, and a full-sized, physical QWERTY keyboard. The task done by our human participant involved simulating a real-life scenarios of entering a digit, character, or password into a text field using the keyboard. While typing, the participant simultaneously wears the MUSE2 EEG headset which streams EEG data to a PC for storage. For the simulation, we devise three separate typing tasks based on the scenarios: 
+
+\begin{itemize}
+\item \textbf{Single Digit Entry}: This task's goal is to determine whether the activity of thinking of, and typing individual digit keys can effect the user's recorded EEG signal. The resulting EEG signal is assumed to contain features that we can extract to train a deep learning model which infers what digit key was pressed by the user during the session. The digits chosen for this task are digits 0 - 9, and for consistency the users are to use the top row of keys in this task, not the number pad on the side of a full-sized keyboard. 
+
+\item \textbf{Single Character Entry}: This task expands on the Single Digit Entry task, by gauging how the 26 characters of the English alphabet can be inferred from recorded EEG signals. It is assumed the activity of thinking of a particular character, hand and eye movements on the keyboard all affect the EEG signal in a more profound way than it does for the digits. This is since, unlike the row of digit keys which is in ascending order from left to right, the QWERTY layout of the keyboard requires the user to think of the location of a particular character.
+
+\item \textbf{Common Password Entry}: The goal of this task is to assess how full passwords of varying length and proportion of characters, symbols and digits can be inferred from recorded EEG signals of users typing them on the physical keyboard. Users memorized a set of 10 randomly chosen passwords and the order of the passwords in the list. The passwords are chosen from a list of the most commonly used passwords [11]. During the recording session, users were asked to type a password from the list.
+\end{itemize}
+
+\subsection{Experimental Setup}
+For each of the three tasks, we collected data from users wearing the MUSE2 EEG Headband which is a generally available consumer-grade BCI. The experiment setup consisted of users wearing the MUSE2 while sitting in front of a PC with a full-sized keyboard. The PC logs keystrokes and saves streamed EEG data from the MUSE2 EEG Headband. We developed out own script which orchestrates the recording trials, telling the user which task to execute. The result of conducting recording sessions, is a dataset of EEG signals and associated typed input. The EEG data is augmented and preprocessed before being fed to our deep learning models.
+\begin{figure}
+  \includegraphics[width=\linewidth]{simulation_chart.png}
+  \caption{Simulation Flow Chart.}
+  \label{fig:fig1}
+\end{figure}
+
+\section{Experiment Methods}
+After simulating an attack where EEG signals are intercepted while users are typing sensitive input, we implement an experiment to determine how the resulting EEG data can be processed by an attacker to infer the sensitive typed information. The following steps are taken in our experiment:
+
+\begin{itemize}
+\item EEG data collection
+\item EEG data preprocessing and augmentation
+\item Training deep learning models
+\end{itemize}
+
+\subsection{Data Collection}
+ To conduct data collection, we developed a script that interfaces with BCI software to read raw EEG signals from the EEG headset when the participant is typing their digit or password. This ensures that the signal is synchronized with the keystrokes. To connect the headset to a computer and read its data stream, we used BlueMuse [10], a Windows application created for this purpose. We created a script which uses a Python library called muselsl to read and save incoming stream data from BlueMuse into .CSV files on our local directory. The result of this process (see Figure 2) are two directories, one for digits and another for passwords. Each directory contains 10 subfolders named for each class (digits 0 - 9 or each password name). Within each subfolder are the EEG recordings, stored as .CSV files. The .CSV files contained 4 columns, one for each channel on the MUSE2 headset (TP10, TP9, AF7, AF6). We reasoned that the channel near the temporal cortex (TP10) would be best suited for revealing key presses on the  for password entry;  thus, we only used the TP10 channel for processing and input to our deep learning models.
+\begin{figure}
+  \includegraphics[width=\linewidth]{simulation_setup.png}
+  \caption{Simulation set-up with MUSE2 and BlueMuse}
+  \label{fig:fig2}
+\end{figure}
+
+\subsection{Data Augmentation and Preprocessing}
+We implemented a Python script to augment and preprocess each EEG signal in our dataset directories. This script traverses the dataset directories, extracts the signal from each .CSV file, and performs our signal processing and augmentation steps.
+For processing the raw data, we first applied a simple IIR noise filter on each of the EEG signals and observed that the signal was less noisy and that it retained the original shape of the signal (see Figure 3). Due to having a small dataset, we experimented with various data augmentation techniques for time series to grow the size of our dataset:
+
+\begin{itemize}
+\item Adding a Gaussian white noise to the EEG signal [13]
+\item Amplifying all values by a random factor [7]
+\item Shifting the time series by a random amount [7]
+\end{itemize}
+
+These augmentation methods were used in prior studies to classify EEG signals using deep learning techniques. We applied the data augmentation techniques: adding gaussian white noise, amplifying the signal, or shifting the signal. For adding Gaussian noise, we chose to generate a gaussian sequence with a mean of 0, and a standard deviation of 15 based on values used in related studies [13]. Gaussian white noise was implemented using the gauss function from the random Python library. We implemented signal amplification by multiplying each value in the time series by the same range. For shifting the EEG signal, we select a random value between -20 and 20, but excluding -5 to 5, inclusive. This value corresponds to the number of data points that are removed from the time series.
+
+\begin{figure} [b!]
+  \includegraphics[width=\linewidth]{iir.png}
+  \caption{IIR filtered signal (orange) of original signal (blue)}
+  \label{fig:fig3}
+\end{figure}
+
+After augmentation, we apply CWT on the data since it transforms the 1-D time series into a 2-D image which can be used effectively in deep learning models that perform image recognition, such as CNN [1]. The pywt Python library was used to generate the CWT using the Morlet wavelet. The matplotlib Python library was used to plot the CWT using a jet colormap (see Figure 4).
+
+\begin{figure} [h!]
+  \includegraphics[width=\linewidth]{cwt.png}
+  \caption{Sample CWT of the signal in Figure 3}
+  \label{fig:fig4}
+\end{figure}
+
+The output of the preprocessing steps are CWT plots of each EEG signal, saved as .JPG files. 
+We combine preprocessing and augmentation into a single script that conducts preprocessing on each EEG signal before generating multiple augmented versions. At this point the signals have been converted into CWTs. The CWT of the original and augmented signals are saved into a directory corresponding with its label (digit 0 - 9 or an index (0 - 9) corresponding to one of the 10 randomly selected passwords). This is to ensure each CWT is grouped based on a label for supervised multiclass classification with our CNN model.
+
+\subsection{Data Analysis and Classification}
+For classification of the EEG signals, we used TensorFlow to create a CNN and RNN model. Each model was created in separate Python scripts; however, both scripts shared a similar data loading logic. Both scripts read the CWT images from our directory using the imageio Python library. The image matrices are appended to lists as are the corresponding labels for each CWT, which come from the name of the directory the CWT was stored in. The result of this process are two lists of equal length, one with CWT matrices and another with labels. For both models, sparse categorical accuracy, sparse categorical loss, dropout, and the Adam optimizer were used. Our hyperparameter tuning included testing various loss values [0.1, 0.01, 0.001, 0.0001] and dropout rates [No Dropout, 0.2, 0.4]. To run our models, we implemented 5-fold cross validation using sklearn’s StratifiedKFold with shuffling [12]. In addition, we implemented early stopping by creating a TensorFlow callback which ends training if loss has increased for more than 10 epochs. By default, each model runs for 200 epochs per cross-validation iteration, unless interrupted by early stopping.
+
+\begin{itemize}
+\item \textbf{CNN}: We first implemented CNN since this type of neural network can learn contextual information from image data such as CWTs. Our CNN is composed of two pairs of Conv2D and MaxPooling layers, followed by a Dense Layer, a Flatten layer, and then two more Dense layers (see Figure 5). To obtain the proper model architecture for our problem, we tested various sizes of the layers, and resolutions for the input and the Conv2D and MaxPooling layers. Relu was used as the activation function for all layers besides the last Dense layer which used softmax. The input to the CNN models was 24 x 64 .jpg images of CWTs.
+
+% \begin{figure}
+%   \includegraphics[width=0.9\linewidth]{cnn.png}
+%   \caption{CNN Model Architecture}
+%   \label{fig:fig4}
+% \end{figure}
+\item \textbf{RNN}: The RNN model consisted of 3 LSTM layers and a single Dense layer with softmax activation (see Figure 6). The input to this model was not a CWT image, instead we just used the filtered and augmented signal of dimension 1 x 1290 (1 channel with 1290 samples per signal).
+\end{itemize}
+
+% \begin{figure} [h!]
+% \centering
+%   \includegraphics[width=0.65\linewidth]{rnn.png}
+%   \caption{RNN Model Architecture}
+%   \label{fig:fig5}
+% \end{figure}
+\section{Results}
+In this section, we present the results for the proposed CNN and RNN models during our experiment with both the Single Digit Entry and Password Entry task. In addition, results from hyperparameter tuning and various data augmentation techniques are shown.
+
+\subsection{Single Digit Entry}
+\subsubsection{Hyperparameter Tuning}
+To gauge how well our CNN and RNN architectures performed for this task, we calculated the average classification accuracy for each combination of learning and dropout rates. We repeated this for each of the data augmentation techniques and reported the average classification accuracy. Table 1 shows how the learning and dropout rates affect the classification accuracy.
+
+The highest average accuracy for CNN (93.89\%) and RNN (81.99\%) from our hyperparameter tuning experiments show that a learning rate of 0.001 should be used with our RNN, and a learning rate of 0.0001 should be used with our CNN model. A dropout rate of 0.2 helps the classification accuracy of the RNN; however, dropout seems to negatively affect the average accuracy for the CNN model. Thus, the remaining results are based on model architectures where for RNN the learning rate is 0.001 and dropout is 0.2, and for CNN the learning rate is 0.0001 with no dropout.
+
+\begin{table}
+\begin{center}
+\caption{Comparison of Classification Accuracy based on Learning Rate and Dropout Rate for Single Digit Entry}
+    \begin{tabular}{ | l | p{1cm}  | p{1cm}  | p{1cm}  | p{1cm} |}
+    \hline
+      & Learning Rate: 0.1 & Learning Rate: 0.01 & Learning Rate: 0.001 & Learning Rate: 0.0001 \\ \hline
+    No Dropout & CNN: 11.30\%  RNN: 26.50\% & CNN: 12.36\% RNN: 75.15\% & CNN: 19.15\% RNN: 79.50\% & CNN: 93.89\% RNN: 50.52\%
+ \\ \hline
+    Dropout: 0.2 & CNN: 10.90\%  RNN: 23.50\% & CNN: 11.67\% RNN: 81.24\% & CNN: 15.50\% RNN: 81.99\%& CNN: 83.07\% RNN: 57.55\%\\ \hline
+    Dropout: 0.4 & CNN: 10.10\%  RNN: 19.25\% & CNN: 11.35\% RNN: 80.72\% & CNN: 12.50\% RNN: 80.25\% & CNN: 68.09\% RNN: 59.90\%
+ \\ \hline
+    \end{tabular}
+    \label{Tab:table1}
+\end{center}
+\end{table}
+
+\subsubsection{Classification Accuracy}
+The classification accuracies of the RNN and CNN models were then compared when introducing the three different data augmentation methods.
+
+\begin{table} [h!]
+\begin{center}
+\caption{Comparison of Classification Accuracy for Single Digit Entry}
+    \begin{tabular}{ | p{1.5cm} | p{1.5cm}  | p{1.5cm}  | p{1.5cm}  |}
+    \hline
+      & Adding Gaussian white noise to the EEG time series & Amplifying all values by a random factor in range [-5, 5] & Shifting the time series by a random amount in range [-20, 20], excluding values in range [-5, 5].
+\\ \hline
+    Average CNN Classification Accuracy (\%) &94.25\% & 93.50\% & 93.91\%
+ \\ \hline
+   Average RNN Classification Accuracy (\%) & 84.32\% & 95.65\% & 66.00\% 
+ \\ \hline
+    \end{tabular}
+    \label{Tab:table2}
+\end{center}
+\end{table}
+
+Table 2 shows that our CNN model had an average classification accuracy of 94.25\% when the EEG data was augmented using Gaussian white noise. However, using amplification and shifting also yielded a high accuracy of 93.50\% and 93.91\%, respectively. Our RNN model provided the highest classification accuracy in the experiment of 95.65\%. This was acheived when augmenting the data by amplifying the signal. Using Gaussian white noise and shifting the time series gave lower average accuracies of 84.32\% and 66.00\%, respectively. Overall, the RNN model performed the best. Figure 7 shows the confusion matrix of the RNN model.
+
+% \begin{figure} [h!]
+% \begin{center}
+%   \includegraphics[width=\linewidth]{cnn_digit.png}
+%   \caption{Confusion Matrix of CNN for Digit data}
+%   \label{fig:fig7}
+% \end{center}
+% \end{figure}
+\begin{figure} [h!]
+\begin{center}
+  \includegraphics[width=0.9\linewidth]{rnn_digit.png}
+  \caption{Confusion Matrix of RNN for Digit data}
+  \label{fig:fig8}
+\end{center}
+\end{figure}
+
+\subsection{Password Entry}
+Similar to the Single Digit Entry task, we compared the results of the same CNN and RNN model architectures but for the Password Entry task.
+
+\subsubsection{Hyperparameter Tuning}
+To gauge how well our CNN and RNN architectures performed for this task, we calculated the average classification accuracy the same way as we did for the Single Digit Entry task. Table 3 shows how the learning and dropout rates affect the classification accuracy.
+
+\begin{table}
+\begin{center}
+\caption{Comparison of Classification Accuracy based on Learning Rate and Dropout Rate}
+    \begin{tabular}{ | l | p{1cm}  | p{1cm}  | p{1cm}  | p{1cm} |}
+    \hline
+      & Learning Rate: 0.1 & Learning Rate: 0.01 & Learning Rate: 0.001 & Learning Rate: 0.0001 \\ \hline
+    No Dropout & CNN: 10.30\%  RNN: 24.95\% & CNN: 11.76\% RNN: 71.55\% & CNN: 12.11\% RNN: 75.60\% & CNN: 82.67\% RNN: 49.22\%
+ \\ \hline
+    Dropout: 0.2 & CNN: 10.18\%  RNN: 23.23\% & CNN: 10.97\% RNN: 80.24\% & CNN: 13.00\% RNN: 83.17\%& CNN: 78.96\% RNN: 51.69\%\\ \hline
+    Dropout: 0.4 & CNN: 10.10\%  RNN: 15.25\% & CNN: 10.55\% RNN: 78.31\% & CNN: 11.52\% RNN: 77.75\% & CNN: 77.57\% RNN: 55.03\%
+ \\ \hline
+    \end{tabular}
+    \label{Tab:table3}
+\end{center}
+\end{table}
+
+The highest average accuracy for CNN 82.67\%) and RNN (83.17\%) from our hyperparameter tuning experiments show that a learning rate of 0.001 should be used with our RNN, and a learning rate of 0.0001 should be used with our CNN model. A dropout rate of 0.2 helps the classification accuracy of the RNN; however, dropout seems to negatively affect the average accuracy for the CNN model. Thus, the remaining results are based on model architectures where for RNN the learning rate is 0.001 and dropout is 0.2, and for CNN the learning rate is 0.0001 with no dropout.
+
+\subsubsection{Classification Accuracy}
+
+\begin{table} [h!]
+\begin{center}
+\caption{Comparison of Classification Accuracy for Password Data}
+    \begin{tabular}{ | p{1.5cm} | p{1.5cm}  | p{1.5cm}  | p{1.5cm}  |}
+    \hline
+      & Adding Gaussian white noise to the EEG time series & Amplifying all values by a random factor in range [-5, 5] & Shifting the time series by a random amount in range [-20, 20], excluding values in range [-5, 5].
+\\ \hline
+    Average CNN Classification Accuracy (\%) &92.53\% & 80.25\% & 75.25\%
+ \\ \hline
+   Average RNN Classification Accuracy (\%) & 90.60\% & 93.40\% & 65.50\% 
+ \\ \hline
+    \end{tabular}
+    \label{Tab:table4}
+\end{center}
+\end{table}
+
+For the password data, the best configuration involved training a RNN on data augmented by amplifying the signals (93.40\% accuracy). Both the RNN and CNN performed well when EEG signals were augmented via adding Gaussian white noise (92.53\% accuracy and 90.60\% accuracy, respectively). Overall, the RNN performed the best. Figure 8 shows the confusion matrix of the RNN.
+% \begin{figure} [h!]
+% \begin{center}
+%   \includegraphics[width=\linewidth]{cnn_pass.png}
+%   \caption{Confusion Matrix of CNN for Password data}
+%   \label{fig:fig8}
+% \end{center}
+% \end{figure}
+\begin{figure} [h!]
+\begin{center}
+  \includegraphics[width=0.9\linewidth]{rnn_pass.png}
+  \caption{Confusion Matrix of RNN for Password data}
+  \label{fig:fig9}
+\end{center}
+\end{figure}
+
+To validate our efforts from hyperparameter tuning for our models, we also measured the average loss and accuracy over time during training. Figure 11 and 12 depicts the loss over time, for our best CNN and RNN models, respectively, on the password data. Based on the plots, we confirm that the models are stable and are trained for sufficient epochs to learn the features of the EEG signals. Early stopping caused both models to halt training before 200 epochs. However, the RNN, training on just the signal vector took only 35 epochs to converge while the CNN took almost 125 epochs.
+
+\begin{figure} [h!]
+\begin{center}
+  \includegraphics[width=\linewidth]{cnn_loss.png}
+  \caption{Loss over time for CNN on Password data}
+  \label{fig:fig8}
+\end{center}
+\end{figure}
+
+\begin{figure} [h!]
+\begin{center}
+  \includegraphics[width=\linewidth]{rnn_loss.png}
+  \caption{Loss over time for RNN on Password data}
+  \label{fig:fig9}
+\end{center}
+\end{figure}
+
+\section{Discussion}
+In this section, we synthesize our findings and outline the limitations of our study.
+
+\subsection{Attack Model}
+Our study focused on studying the vulnerability of EEG Headsets for home use, which are currently available to consumers. Our attack model consists of an attacker inferring a user's typed password by processing their EEG signals recorded during the event of password entry. To demonstrate the feasibility of a hacker inferring sensitive user information from intercepted EEG signals, we devised an EEG data collection pipeline and developed deep learning models to infer passwords from raw EEG signals with promising accuracy.
+Related to our study, is work done by Neupane which studied the feasibility of attacks on BCIs, by conducting EEG recording trials where their participants memorized a set of 4-digit PINs and 6-character passwords and type them while having their EEG signals recorded [3]. Classifiers such as IB-1, KStar and Naive Bayes were developed to predict the digits and passwords the participants typed, based on their EEG signals. In comparison, we conducted trials using randomly selected passwords of varying length, including both digits and characters. In addition, we utilized deep learning models such as CNN and RNN to classify the EEG signals, versus using machine learning models.
+
+\subsection{Strengths and Limitations}
+Our study has several strengths in terms of data and data collection. The study used randomly selected passwords from a list of leaked real-life passwords. Data collection was conducted in a semi-realistic setting where the human participant was sitting in front of a computer and entering the passwords in a basic text editor. In addition, data was recorded using a readily available consumer-grade EEG headset, the MUSE2. Due to our small dataset size, cross validation was used to validate that our models perform well. However, limitations with our process exist. Similar to previous studies on this topic, our study focused on a selected set of passwords. In addition, we had a single human participant to record data from, who also knew they were being recorded, which may affect their performance during the data collection trials. Despite the limitations, we believe that our study highlights the vulnerability present in EEG headsets and the feasibility of a model being built to discern various passwords from EEG data.
+
+\section{Conclusion}
+In this paper, we have proposed an image recognition - based deep learning approach for inferring passwords and digits from raw EEG signals. This involved conducting classification of EEG signals recorded while a person was entering password and digits on a physical keyboard. We also explored various signal processes, and data augmentation techniques. The RNN model performed the best in our experiments with promising average classification accuracies of 95.65\% and 94.40\% on our dataset for digits and words, respectively. The CNN model performed similarly too; to date we have not seen any model perform as high as ours on the task of inferring user PINs or passwords through EEG data. These models demonstrate the feasibility of inferring passwords from raw EEG signals. The popularity and accessibility of EEG headsets continues to rise as more consumers realize the benefits of monitoring their EEG signals. Hence, it is important to continue future studies on the security implications of having EEG data intercepted from vulnerable EEG headsets and BCIs. 
+
+\section{References}
+[1] J. L. M. Kumar, M. Rashid, R. M. Musa, M. A. M. Razman, N. Sulaiman, R. Jailani and A. P. A. Majeed, "The classification of EEG-based wink signals: A CWT-Transfer Learning pipeline," ScienceDirect, 20 September 2020.\newline
+[2] F. P. Sjamsudin, "EEG-based Authentication with Machine Learning," 30 January 2017.\newline
+[3] A. Neupane, M. L. Rahman and N. Saxena, "PEEP: Passively Eavesdropping Private Input via Brainwave Signals".\newline
+[4] Mindbigdata.com. 2021. MindBigData the MNIST of Brain Digits. \newline
+[5] A. Agarwal, R. Dowsley, N. D. McKinney, D. Wu, C.-T. Lin, M. De Cock and A. C. Nascimento, "Protecting Privacy of Users in Brain-Computer Interface Applications," IEEE TRANSACTIONS ON NEURAL SYSTEMS AND REHABILITATION ENGINEERING, p. 10, 2019.Conference Name:ACM Woodstock conference \newline
+[6] Y. Xiao, Y. Jia, X. Cheng, J. Yu, Z. Liang and Z. Tian, "I Can See Your Brain: Investigating Home-Use Electroencephalography System Security," IEEE, August 2019.\newline
+[7] A. Sakai, Y. Minoda and K. Morikawa, "Data augmentation methods for machine-learning-based classification of bio-signals," 2017 10th Biomedical Engineering International Conference (BMEiCON), 2017, pp. 1-4, doi: 10.1109/BMEiCON.2017.8229109.\newline
+[8] Bashivan, Pouya; Yeasin, Mohammed; Rish, Irina; Codella, Noel, “Learning Representations from EEG with Deep Recurrent-Convolutional Neural Networks.” International Conference On Learning Representations (2016).\newline
+[9] C. Spampinato, S. Palazzo, I. Kavasidis, D. Giordano, N. Souly and M. Shah, "Deep Learning Human Mind for Automated Visual Classification," 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2017, pp. 4503-4511, doi: 10.1109/CVPR.2017.479.\newline
+[10] Kowaleski, J. (2021, December 17). BlueMuse. Retrieved January 28, 2022, from GitHub: https://github.com/kowalej/BlueMuse\newline
+[11] NordPass, "Top 200 Most Common Passwords," [Online]. Available: https://nordpass.com/most-common-passwords-list/. [Accessed 21 January 2022].\newline
+[12] Scikit-learn: Machine Learning in Python, Pedregosa et al., JMLR 12, pp. 2825-2830, 2011.\newline
+[13] E. Lashgari, . D. Liang and U. Maoz, "Data Augmentation for Deep-Learning-Based Electroencephalography".\newline
+[14] A. Craik, Y. He and J. L. Contreras-Vidal, "Deep Learning for electroencephalogram (EEG) classification tasks: a review," Journal of Neural Engineering, 2019.
+[15] Ullah, S., Halim, Z. Imagined character recognition through EEG signals using deep convolutional neural network. Med Biol Eng Comput 59, 1167–1183 (2021)
+
+
+\end{document}
