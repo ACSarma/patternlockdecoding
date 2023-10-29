@@ -10,6 +10,7 @@ from keras.callbacks import EarlyStopping
 from keras.layers import Dense, Dropout, BatchNormalization, LeakyReLU, AveragePooling1D, GlobalAveragePooling1D
 from keras.layers import Flatten
 from keras.layers import LSTM
+from keras.layers import GRU
 from keras.layers import Conv1D
 from keras.layers import MaxPool1D
 from keras.models import Sequential
@@ -21,11 +22,11 @@ from sklearn.utils import shuffle
 from keras.optimizers import Adam
 
 
-def create_lstm_model(lr, dr, resolution, num_labels, num_hidden):
+def create_lstm_model(lr, dr, num_labels, num_hidden, in_shape):
     curr_units = 2048
 
     model = Sequential()
-    model.add(LSTM(units=curr_units, return_sequences=True, input_shape=(1, resolution)))
+    model.add(LSTM(units=curr_units, return_sequences=True, input_shape=in_shape))
 
     for layer in range(num_hidden):
         curr_units = curr_units / 2
@@ -77,11 +78,39 @@ def create_lstm_model1(lr, dr, resolution, num_labels, num_hidden):
     return model
 
 
-def create_cnn_model(lr, dr, resolution, num_labels, num_hidden):
+def create_gru_model(lr, dr, num_labels, num_hidden, in_shape):
+    curr_units = 2048
+
+    model = Sequential()
+    model.add(GRU(units=curr_units, return_sequences=True, input_shape=in_shape))
+
+    for layer in range(num_hidden):
+        curr_units = curr_units / 2
+        model.add(GRU(units=int(curr_units), return_sequences=True))
+        model.add(Dropout(dr))
+
+    curr_units = curr_units / 2
+    model.add(GRU(units=int(curr_units), return_sequences=False))
+    model.add(Dense(units=36))
+    model.add(Dense(units=16))
+    model.add(Flatten())
+    model.add(Dense(units=num_labels, activation='sigmoid'))
+
+    opt = Adam(learning_rate=lr)
+    model.compile(
+        loss='sparse_categorical_crossentropy',
+        optimizer=opt,
+        metrics=['sparse_categorical_accuracy'],
+    )
+
+    return model
+
+
+def create_cnn_model(lr, dr, num_labels, num_hidden, in_shape):
     curr_units = 256
 
     model = Sequential()
-    model.add(Conv1D(filters=curr_units, kernel_size=7, input_shape=(resolution, 4)))  # 1
+    model.add(Conv1D(filters=curr_units, kernel_size=7, input_shape=in_shape))  # 1
     model.add(LeakyReLU())
     model.add(MaxPool1D(pool_size=10))  # 2
     model.add(Dropout(dr))
@@ -101,10 +130,10 @@ def create_cnn_model(lr, dr, resolution, num_labels, num_hidden):
     return model
 
 
-def create_dense_model(lr, dr, resolution, num_labels, num_hidden):
-    curr_units = 1000
+def create_dense_model(lr, dr, num_labels, in_shape):
+    curr_units = 1200
     model = Sequential()
-    model.add(Dense(curr_units, input_shape=(1, resolution)))
+    model.add(Dense(curr_units, input_shape=in_shape))
     model.add(Dropout(dr))
     model.add(Dense(curr_units / 2))
     model.add(Dropout(dr))
@@ -112,13 +141,13 @@ def create_dense_model(lr, dr, resolution, num_labels, num_hidden):
     model.add(Dropout(dr))
     model.add(Dense(curr_units / 8))
     model.add(Dropout(dr))
-    model.add(Dense(num_labels, activation='sigmoid'))
+    model.add(Dense(num_labels, activation='softmax'))
 
     opt = Adam(learning_rate=lr)
     model.compile(
-        loss='sparse_categorical_crossentropy',
+        loss='binary_crossentropy',
         optimizer=opt,
-        metrics=['sparse_categorical_accuracy'],
+        metrics=['accuracy'],
     )
     return model
 

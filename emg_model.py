@@ -37,10 +37,10 @@ type_dict = {
 resolution = 1296
 num_augmented = 5
 
-X_data = []
-Y_labels = []
 
-if __name__ == '__main__':
+def getdata(resize=False, req_resolution=None):
+    X_data = []
+    Y_labels = []
     countlab = 0
     for difficulty in type_dict.keys():
         for pattern in type_dict[difficulty]:
@@ -75,28 +75,39 @@ if __name__ == '__main__':
 
     Y_labels = np.array(Y_labels)
     X_data = np.stack(X_data, axis=0)
-    print(X_data.shape)
     print(Y_labels.shape)
+    print(len(np.unique(Y_labels)))
     objects = StandardScaler()
     X_data = objects.fit_transform(X_data)
-    X_dataR = []
-    for emg in X_data:
-        emg = np.resize(emg, (1, resolution))
-        X_dataR.append(emg)
-    X_data = np.stack(X_dataR, axis=0)
 
-    print(len(np.unique(Y_labels)))
+    if resize:
+        X_dataR = []
+        for emg in X_data:
+            emg = np.resize(emg, req_resolution)
+            X_dataR.append(emg)
+        X_data = np.stack(X_dataR, axis=0)
+
+    print(X_data.shape)
+
+    return X_data, Y_labels
+
+
+if __name__ == '__main__':
+    X_data, Y_labels = getdata(resize=True, req_resolution=(1, resolution))
+    model = 'gru'
+
     print("Starting Model")
 
     accuracies = []
     recalls = []
     summary = ""
     summaryAvg = ""
-    drs = [0.4]  # dropout rates testing
-    lrs = [0.0001]  # learning rates testing
+    drs = [0.0]  # dropout rates testing
+    lrs = [0.001]  # learning rates testing
     hls = [3]
     epochs = 200
     best_hist = None
+    best_cm = None
 
     # s = np.arange(0, len(X_data), 1)
     # shuffle(s)
@@ -107,7 +118,6 @@ if __name__ == '__main__':
         for r in range(len(drs)):
             for c in range(len(lrs)):
                 kfolds = KFold(n_splits=5, shuffle=True, random_state=0)
-                accuracies1 = []
                 accuracies2 = []
                 for train_mask, test_mask in kfolds.split(X_data, Y_labels):
                     X_trainC = X_data[train_mask]
@@ -116,7 +126,14 @@ if __name__ == '__main__':
                     X_testC = X_data[test_mask]
                     y_testC = Y_labels[test_mask]
 
-                    model2 = ml_models.create_lstm_model(lrs[c], drs[r], resolution, 6, hls[h])
+                    if model == 'lstm':
+                        model2 = ml_models.create_lstm_model(lrs[c], drs[r], 6, hls[h], (1, resolution))
+                    if model == 'gru':
+                        model2 = ml_models.create_gru_model(lrs[c], drs[r], 6, hls[h], (1, resolution))
+                    if model == 'cnn':
+                        model2 = ml_models.create_cnn_model(lrs[c], drs[r], 6, hls[h], (resolution, 1))
+                    else:
+                        model2 = ml_models.create_lstm_model(lrs[c], drs[r], 6, hls[h], (1, resolution))
 
                     callback = EarlyStopping(
                         monitor='loss', min_delta=0.01,
@@ -130,8 +147,7 @@ if __name__ == '__main__':
                     print("Accuracy on Test: ", acc)
 
                     cm = confusion_matrix(y_testC, y_predicted_labels)
-                    ml_metrics.plot_confusion_matrix(cm, classes=range(10),
-                                          title='')
+
                     FP = cm.sum(axis=0) - np.diag(cm)
                     FN = cm.sum(axis=1) - np.diag(cm)
                     TP = np.diag(cm)
@@ -139,11 +155,10 @@ if __name__ == '__main__':
                     FNR = FN / (TP + FN)
                     TPR = TP / (TP + FN)
 
-                    plt.show()
-
                     accuracies2.append(acc)
                     if max(accuracies2) == acc:
                         best_hist = hist
+                        best_cm = cm
 
                     summary += f'Hidden Layers: {hls[h]}, Dropout: {drs[r]}, Learning Rate: {lrs[c]}; Accuracy: {acc} - {datetime.datetime.now()}; FNR: {FNR}; TPR: {TPR} \n'
                 print(accuracies2, "\nAverage Accuracy: ", np.average(accuracies2), "Hidden Layers: ", hls[h])
@@ -153,6 +168,8 @@ if __name__ == '__main__':
     for i in range(len(best_hist.history['loss'])):
         e_list.append(i)
 
+    print(summaryAvg)
+
     plt.plot(e_list, best_hist.history['loss'], label='Training Loss')
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
@@ -160,11 +177,14 @@ if __name__ == '__main__':
 
     plt.show()
 
-    plt.plot(e_list, best_hist.history['sparse_categorical_accuracy'], label='Training Accuracy')
+    plt.plot(e_list, best_hist.history['accuracy'], label='Training Accuracy')
     plt.xlabel('Epochs')
     plt.ylabel('Accuracy')
     plt.legend()
 
     plt.show()
 
-    print(summaryAvg)
+    ml_metrics.plot_confusion_matrix(best_cm, classes=range(10),
+                                     title='')
+    plt.show()
+

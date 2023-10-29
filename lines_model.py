@@ -19,12 +19,13 @@ import augment_emg
 
 directory = "Data/Sync/Lines"
 
-X_data = []
-Y_labels = []
 resolution = 100
 num_augmented = 5
 
-if __name__ == '__main__':
+
+def getdata(resize=False, req_resolution=None):
+    X_data = []
+    Y_labels = []
     lines = os.listdir(f'{directory}')
     for li in lines:
         label = int(re.search(r'\d+', li.title()).group())
@@ -45,37 +46,44 @@ if __name__ == '__main__':
                 new_sig = np.asarray(new_sig)
                 X_data.append(new_sig)
                 Y_labels.append(label)
-                plt.plot(new_sig)
             # emg = normalize([emg])[0]
             X_data.append(emg)
             Y_labels.append(label)
-
-            plt.plot(emg)
-            plt.show()
 
     Y_labels = np.array(Y_labels)
     X_data = np.stack(X_data, axis=0)
     print(X_data.shape)
     print(Y_labels.shape)
+    unique_labs = len(np.unique(Y_labels))
+    print(unique_labs)
     objects = StandardScaler()
     X_data = objects.fit_transform(X_data)
-    X_dataR = []
-    for emg in X_data:
-        emg = np.resize(emg, (1, resolution))
-        X_dataR.append(emg)
-    X_data = np.stack(X_dataR, axis=0)
 
-    unique_lab = len(np.unique(Y_labels))
+    if resize:
+        X_dataR = []
+        for emg in X_data:
+            emg = np.resize(emg, req_resolution)
+            X_dataR.append(emg)
+        X_data = np.stack(X_dataR, axis=0)
+
+    return X_data, Y_labels, unique_labs
+
+
+if __name__ == '__main__':
+    X_data, Y_labels, unique_labs = getdata()
+    model = 'cnn'
+
     print("Starting Model")
 
     accuracies = []
     summary = ""
     summaryAvg = ""
-    drs = [0, 0.4]  # dropout rates testing
-    lrs = [0.0005]  # learning rates testing
-    hls = [1, 2, 3]
+    drs = [0]  # dropout rates testing
+    lrs = [0.0001]  # learning rates testing
+    hls = [1]
     epochs = 200
     best_hist = None
+    best_cm = None
 
     # s = np.arange(0, len(X_data), 1)
     # shuffle(s)
@@ -95,10 +103,17 @@ if __name__ == '__main__':
                     X_testC = X_data[test_mask]
                     y_testC = Y_labels[test_mask]
 
-                    model2 = ml_models.create_lstm_model(lrs[c], drs[r], resolution, unique_lab, hls[h])
+                    if model == 'lstm':
+                        model2 = ml_models.create_lstm_model(lrs[c], drs[r], unique_labs, hls[h], (1, resolution))
+                    if model == 'gru':
+                        model2 = ml_models.create_gru_model(lrs[c], drs[r], unique_labs, hls[h], (1, resolution))
+                    if model == 'cnn':
+                        model2 = ml_models.create_cnn_model(lrs[c], drs[r], unique_labs, hls[h], (resolution, 1))
+                    else:
+                        model2 = ml_models.create_lstm_model(lrs[c], drs[r], unique_labs, hls[h], (1, resolution))
 
                     callback = EarlyStopping(
-                        monitor='sparse_categorical_accuracy', min_delta=0.001,
+                        monitor='loss', min_delta=0.001,
                         patience=10)
 
                     hist = model2.fit(X_trainC, y_trainC, epochs=epochs, callbacks=[callback])
@@ -108,8 +123,6 @@ if __name__ == '__main__':
                     print("Accuracy on Test: ", acc)
 
                     cm = confusion_matrix(y_testC, y_predicted_labels)
-                    # ml_metrics.plot_confusion_matrix(cm, classes=range(unique_lab),
-                    #                       title='')
                     FP = cm.sum(axis=0) - np.diag(cm)
                     FN = cm.sum(axis=1) - np.diag(cm)
                     TP = np.diag(cm)
@@ -117,11 +130,10 @@ if __name__ == '__main__':
                     FNR = FN / (TP + FN)
                     TPR = TP / (TP + FN)
 
-                    # plt.show()
-
                     accuracies2.append(acc)
                     if max(accuracies2) == acc:
                         best_hist = hist
+                        best_cm = cm
 
                     summary += f'Hidden Layers: {hls[h]}, Dropout: {drs[r]}, Learning Rate: {lrs[c]}; Accuracy: {acc} - {datetime.datetime.now()}; FNR: {FNR}; TPR: {TPR} \n'
                 print(accuracies2, "\nAverage Accuracy: ", np.average(accuracies2), "Hidden Layers: ", hls[h])
@@ -131,11 +143,17 @@ if __name__ == '__main__':
     for i in range(len(best_hist.history['loss'])):
         e_list.append(i)
 
+    print(summaryAvg)
+
     plt.plot(e_list, best_hist.history['loss'], label='Training Loss')
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
 
+    plt.show()
+
+    ml_metrics.plot_confusion_matrix(best_cm, classes=range(unique_labs),
+                          title='')
     plt.show()
 
     plt.plot(e_list, best_hist.history['sparse_categorical_accuracy'], label='Training Accuracy')
@@ -144,5 +162,3 @@ if __name__ == '__main__':
     plt.legend()
 
     plt.show()
-
-    print(summaryAvg)

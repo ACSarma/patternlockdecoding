@@ -45,7 +45,8 @@ resolution = 1275
 X_data = []
 Y_labels = []
 
-if __name__ == '__main__':
+
+def getdata(resize=False):
     X_data = []
     Y_labels = []
     info = mne.create_info(ch_names=['AF7', 'AF8', 'TP9', 'TP10'], ch_types=['eeg', 'eeg', 'eeg', 'eeg'], sfreq=255)
@@ -69,7 +70,7 @@ if __name__ == '__main__':
                     Y_labels.append(1)
                 except Exception as e:
                     print(e)
-                    input()
+                    print(f'{directory}/{difficulty}{pattern}/{file}')
 
     ntDir = "Data/EEG_NT"
     total_data = os.listdir(ntDir)
@@ -102,19 +103,29 @@ if __name__ == '__main__':
 
     Y_labels = np.array(Y_labels)
     X_data = np.array(X_data)
-    X_data = np.moveaxis(X_data, 1, 2)
+
+    if resize:
+        X_data = np.moveaxis(X_data, 1, 2)
+
     print(X_data.shape)
     print(Y_labels.shape)
 
     objects = StandardScaler()
     print(f'Unique Labels: {len(np.unique(Y_labels))}')
-    print("Starting Model")
+
+    return X_data, Y_labels
+
+
+if __name__ == '__main__':
+    X_data, Y_labels = getdata(resize=False)
+    modelsel = 'gru'
+    print(modelsel)
 
     accuracies = []
     summary = ""
     summaryAvg = ""
-    drs = [0, 0.2, 0.4]  # dropout rates testing
-    lrs = [0.01, 0.001, 0.00005]  # learning rates testing
+    drs = [0.4]  # dropout rates testing
+    lrs = [0.01, 0.001, 0.0001]  # learning rates testing
     hls = [1]
     epochs = 200
     best_hist = None
@@ -137,7 +148,18 @@ if __name__ == '__main__':
                     X_testC = X_data[test_mask]
                     y_testC = Y_labels[test_mask]
 
-                    model2 = ml_models.create_cnn_model(lrs[c], drs[r], resolution, 2, hls[h])
+                    if modelsel == 'lstm':
+                        model2 = ml_models.create_lstm_model(lrs[c], drs[r], 2, hls[h], (4, resolution))
+                        print("jsdfs")
+                    elif modelsel == 'gru':
+                        model2 = ml_models.create_gru_model(lrs[c], drs[r], 2, hls[h], (4, resolution))
+                        print("jsdfs")
+                    elif modelsel == 'cnn':
+                        model2 = ml_models.create_cnn_model(lrs[c], drs[r], 2, hls[h], (resolution, 4))
+                        print("jsdfs")
+                    else:
+                        model2 = ml_models.create_cnn_model(lrs[c], drs[r], 2, hls[h], (resolution, 4))
+                        print("jsdfs")
                     print(model2.summary())
                     callback = EarlyStopping(
                         monitor='loss', min_delta=0.001,
@@ -173,6 +195,8 @@ if __name__ == '__main__':
     for i in range(len(best_hist.history['loss'])):
         e_list.append(i)
 
+    print(summaryAvg)
+
     plt.plot(e_list, best_hist.history['loss'], label='Training Loss')
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
@@ -186,5 +210,3 @@ if __name__ == '__main__':
     plt.legend()
 
     plt.show()
-
-    print(summaryAvg)
