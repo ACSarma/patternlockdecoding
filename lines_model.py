@@ -70,8 +70,8 @@ def getdata(resize=False, req_resolution=None):
 
 
 if __name__ == '__main__':
-    X_data, Y_labels, unique_labs = getdata()
-    model = 'cnn'
+    X_data, Y_labels, unique_labs = getdata(resize=True, req_resolution=(1, resolution))
+    model = 'lstm'
 
     print("Starting Model")
 

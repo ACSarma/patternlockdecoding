@@ -124,7 +124,7 @@ if __name__ == '__main__':
     accuracies = []
     summary = ""
     summaryAvg = ""
-    drs = [0.4]  # dropout rates testing
+    drs = [0.2]  # dropout rates testing
     lrs = [0.01, 0.001, 0.0001]  # learning rates testing
     hls = [1]
     epochs = 200
@@ -172,10 +172,10 @@ if __name__ == '__main__':
                     print("Accuracy on Test: ", acc)
 
                     cm = confusion_matrix(y_testC, y_predicted_labels)
-                    # ml_metrics.plot_confusion_matrix(cm, classes=range(10),
-                    #                                  title='')
+                    ml_metrics.plot_confusion_matrix(cm, classes=range(10),
+                                                     title='')
 
-                    # plt.show()
+                    plt.show()
                     FP = cm.sum(axis=0) - np.diag(cm)
                     FN = cm.sum(axis=1) - np.diag(cm)
                     TP = np.diag(cm)
