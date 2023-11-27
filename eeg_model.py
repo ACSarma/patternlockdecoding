@@ -161,7 +161,7 @@ if __name__ == '__main__':
                         model2 = ml_models.create_cnn_model(lrs[c], drs[r], 2, hls[h], (resolution, 4))
                         print("jsdfs")
                     dot_img_file = f'Models/{modelsel}.png'
-                    tf.keras.utils.plot_model(model2, to_file=dot_img_file, show_shapes=True)
+                    # tf.keras.utils.plot_model(model2, to_file=dot_img_file, show_shapes=True)
                     callback = EarlyStopping(
                         monitor='loss', min_delta=0.001,
                         patience=5)

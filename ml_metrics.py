@@ -39,7 +39,7 @@ def plot_loss(best_hist):
     plt.legend()
     plt.show()
 
-    plt.plot(e_list, best_hist.history['sparse_categorical_accuracy'], label='Training Accuracy')
+    plt.plot(e_list, best_hist.history['accuracy'], label='Training Accuracy')
     plt.xlabel('Epochs')
     plt.ylabel('Accuracy')
     plt.legend()
