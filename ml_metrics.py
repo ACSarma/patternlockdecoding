@@ -19,10 +19,28 @@ def plot_confusion_matrix(cm, classes,
     plt.clim(float(0.00), float(1.00))
     thresh = cm.max() / 2.
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, '%.2f' % (cm[i, j]),
+         plt.text(j, i, '%.2f' % (cm[i, j]),
                  horizontalalignment="center",
                  color="white" if cm[i, j] > thresh else "black")
 
     plt.tight_layout()
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
+
+
+def plot_loss(best_hist):
+    e_list = []
+    for i in range(len(best_hist.history['loss'])):
+        e_list.append(i)
+
+    plt.plot(e_list, best_hist.history['loss'], label='Training Loss')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.show()
+
+    plt.plot(e_list, best_hist.history['sparse_categorical_accuracy'], label='Training Accuracy')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    plt.show()

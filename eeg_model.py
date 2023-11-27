@@ -125,7 +125,7 @@ if __name__ == '__main__':
     summary = ""
     summaryAvg = ""
     drs = [0.2]  # dropout rates testing
-    lrs = [0.01, 0.001, 0.0001]  # learning rates testing
+    lrs = [0.001]  # learning rates testing
     hls = [1]
     epochs = 200
     best_hist = None
@@ -170,6 +170,8 @@ if __name__ == '__main__':
                     y_predicted_labels = [np.argmax(i) for i in y_predicted]
                     acc = metrics.accuracy_score(y_testC, y_predicted_labels)
                     print("Accuracy on Test: ", acc)
+
+                    ml_metrics.plot_loss(hist)
 
                     cm = confusion_matrix(y_testC, y_predicted_labels)
                     ml_metrics.plot_confusion_matrix(cm, classes=range(10),

@@ -102,7 +102,7 @@ if __name__ == '__main__':
     recalls = []
     summary = ""
     summaryAvg = ""
-    drs = [0.0]  # dropout rates testing
+    drs = [0.4]  # dropout rates testing
     lrs = [0.001]  # learning rates testing
     hls = [3]
     epochs = 200
@@ -145,6 +145,8 @@ if __name__ == '__main__':
                     recalls.append(metrics.recall_score(y_testC, y_predicted_labels, average='macro'))
                     acc = metrics.accuracy_score(y_testC, y_predicted_labels)
                     print("Accuracy on Test: ", acc)
+
+                    ml_metrics.plot_loss(hist)
 
                     cm = confusion_matrix(y_testC, y_predicted_labels)
 

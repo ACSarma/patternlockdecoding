@@ -122,6 +122,7 @@ if __name__ == '__main__':
                     acc = metrics.accuracy_score(y_testC, y_predicted_labels)
                     print("Accuracy on Test: ", acc)
 
+                    ml_metrics.plot_loss(hist)
                     cm = confusion_matrix(y_testC, y_predicted_labels)
                     FP = cm.sum(axis=0) - np.diag(cm)
                     FN = cm.sum(axis=1) - np.diag(cm)
