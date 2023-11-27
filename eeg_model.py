@@ -117,8 +117,8 @@ def getdata(resize=False):
 
 
 if __name__ == '__main__':
-    X_data, Y_labels = getdata(resize=False)
-    modelsel = 'gru'
+    X_data, Y_labels = getdata(resize=True)
+    modelsel = 'cnn'
     print(modelsel)
 
     accuracies = []
@@ -160,7 +160,8 @@ if __name__ == '__main__':
                     else:
                         model2 = ml_models.create_cnn_model(lrs[c], drs[r], 2, hls[h], (resolution, 4))
                         print("jsdfs")
-                    print(model2.summary())
+                    dot_img_file = f'Models/{modelsel}.png'
+                    tf.keras.utils.plot_model(model2, to_file=dot_img_file, show_shapes=True)
                     callback = EarlyStopping(
                         monitor='loss', min_delta=0.001,
                         patience=5)

@@ -38,6 +38,18 @@ resolution = 1296
 num_augmented = 5
 
 
+def plot_list(in_list, pattern):
+    legends = []
+    ind = 0
+    print(pattern)
+    for item in in_list:
+        plt.plot(item)
+        legends.append("Sample" + str(ind))
+        ind += 1
+    plt.legend(legends)
+    plt.show()
+
+
 def getdata(resize=False, req_resolution=None):
     X_data = []
     Y_labels = []
@@ -93,8 +105,8 @@ def getdata(resize=False, req_resolution=None):
 
 
 if __name__ == '__main__':
-    X_data, Y_labels = getdata(resize=True, req_resolution=(1, resolution))
-    model = 'gru'
+    X_data, Y_labels = getdata(resize=False, req_resolution=(1, resolution))
+    model = 'cnn'
 
     print("Starting Model")
 
@@ -104,7 +116,7 @@ if __name__ == '__main__':
     summaryAvg = ""
     drs = [0.0]  # dropout rates testing
     lrs = [0.001]  # learning rates testing
-    hls = [3]
+    hls = [1]
     epochs = 200
     best_hist = None
     best_cm = None
@@ -134,7 +146,8 @@ if __name__ == '__main__':
                         model2 = ml_models.create_cnn_model(lrs[c], drs[r], 6, hls[h], (resolution, 1))
                     else:
                         model2 = ml_models.create_lstm_model(lrs[c], drs[r], 6, hls[h], (1, resolution))
-
+                    dot_img_file = f'Models/{model}_emg.png'
+                    tf.keras.utils.plot_model(model2, to_file=dot_img_file, show_shapes=True)
                     callback = EarlyStopping(
                         monitor='loss', min_delta=0.01,
                         patience=5)

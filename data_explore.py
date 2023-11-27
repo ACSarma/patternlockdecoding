@@ -39,7 +39,11 @@ if __name__ == '__main__':
 
                     # filtered is the filtered version of data
                     emg = data.emg_signal
+                    plt.plot(emg)
+                    plt.show()
                     emg = normalize([emg])[0]
+                    plt.plot(emg)
+                    plt.show()
                     emg = np.resize(emg, resolution)
                     emg = np.asarray(emg)
                     X_data.append(emg)
