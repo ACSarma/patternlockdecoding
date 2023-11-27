@@ -26,6 +26,23 @@ type_dict = {
 }
 resolution = 1200
 
+
+def plot_stuff(dataT):
+    fig, axs = plt.subplots(4)
+    ticks = [0, 200, 400, 600, 800, 1000, 1200]
+    ticklabels = [0, 1000, 2000, 3000, 4000, 5000, 6000]
+    axs[0].plot(dataT[0])
+    axs[0].set_xticks(ticks, ticklabels)
+    axs[1].plot(dataT[1])
+    axs[1].set_xticks(ticks, ticklabels)
+    axs[2].plot(dataT[2])
+    axs[2].set_xticks(ticks, ticklabels)
+    axs[3].plot(dataT[3])
+    axs[3].set_xticks(ticks, ticklabels)
+
+    plt.show()
+
+
 if __name__ == '__main__':
     countlab = 0
     X_data = []
@@ -78,32 +95,42 @@ if __name__ == '__main__':
                     eeg = np.array(eeg)
                     eeg.resize(4, 1296)
 
+                    plot_stuff(eeg)
+                    print("orig")
+
                     raw = mne.io.RawArray(eeg, info)
                     raw.set_eeg_reference()
-                    raw.filter(l_freq=1, h_freq=45, filter_length=1295)
+                    raw.notch_filter(50)
+
+                    plot_stuff(raw.get_data())
+                    print("notched")
+
+                    raw.filter(l_freq=8, h_freq=30, filter_length=1295)
+
+                    plot_stuff(raw.get_data())
+                    print("filt")
 
                     X_data.append(raw.get_data())
                     Y_labels.append(countlab)
 
                 except Exception as e:
                     print(e)
-                    input()
 
             countlab = countlab + 1
 
     X_data = np.array(X_data)
     print(X_data.shape)
-    while True:
-        elem = random.choice(X_data)
-        fig, axs = plt.subplots(4)
-        ticks = [0, 200, 400, 600, 800, 1000, 1200]
-        ticklabels = [0, 1000, 2000, 3000, 4000, 5000, 6000]
-        axs[0].plot(elem[0])
-        axs[0].xticks(ticks, ticklabels)
-        axs[1].plot(elem[1])
-        axs[1].xticks(ticks, ticklabels)
-        axs[2].plot(elem[2])
-        axs[2].xticks(ticks, ticklabels)
-        axs[3].plot(elem[3])
-        axs[3].xticks(ticks, ticklabels)
-        plt.show()
+    # while True:
+    #     elem = random.choice(X_data)
+    #     fig, axs = plt.subplots(4)
+    #     ticks = [0, 200, 400, 600, 800, 1000, 1200]
+    #     ticklabels = [0, 1000, 2000, 3000, 4000, 5000, 6000]
+    #     axs[0].plot(elem[0])
+    #     axs[0].xticks(ticks, ticklabels)
+    #     axs[1].plot(elem[1])
+    #     axs[1].xticks(ticks, ticklabels)
+    #     axs[2].plot(elem[2])
+    #     axs[2].xticks(ticks, ticklabels)
+    #     axs[3].plot(elem[3])
+    #     axs[3].xticks(ticks, ticklabels)
+    #     plt.show()
