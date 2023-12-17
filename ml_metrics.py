@@ -1,3 +1,8 @@
+'''
+Author: Arun Sarma
+Course: CSS595
+Purpose: This script has functions for creating confusion matrices and other model metric visuals as seen fit.
+'''
 import itertools
 import matplotlib.pyplot as plt
 import numpy as np

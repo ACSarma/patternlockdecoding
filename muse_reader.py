@@ -1,6 +1,6 @@
 '''
 Arun Sarma
-CSS700
+CSS595
 
 Preconditions: The Muse2 EEG Headset is connected via Bluetooth to the device using BlueMuse
 Purpose: This script records EEG signal data for each trial. A trial is determined by the selected complexity and pattern ID set in type_dict. Saves data as separate .csv files and sends a signal "q" to arduino_reader.py to end its recording
@@ -33,7 +33,7 @@ directory = "Data/EEG"
 
 if __name__ == '__main__':
     muses = list_muses()
-    # view(version=2)
+    view(version=2)
 
     print("Wait for Arduino communication")
     time.sleep(2)

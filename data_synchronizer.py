@@ -1,3 +1,8 @@
+'''
+Author: Arun Sarma
+Course: CSS595
+Purpose: Syncronizes EEG and EMG data based on timestamp, using a left-join. Output should be new files in the Data/Sync folder
+'''
 import pandas as pd
 import os
 import os.path

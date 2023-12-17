@@ -1,3 +1,9 @@
+'''
+Author: Arun Sarma
+Course: CSS595
+Purpose: Just a script to test plotting the data, inspect the data after recording sessions
+'''
+
 import itertools
 import matplotlib.pyplot as plt
 import os

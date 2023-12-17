@@ -1,3 +1,6 @@
+'''
+Just a script to explore the EEG data and functions of the MNE library
+'''
 import itertools
 import matplotlib.pyplot as plt
 import os
