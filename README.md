@@ -1,5 +1,5 @@
 # patternlockdecoding
-IEEE publication: https://www.linkedin.com/safety/go/?url=https%3A%2F%2Fieeexplore%2Eieee%2Eorg%2Fdocument%2F10230156&urlhash=BaMC&mt=vdaLhiYL_K4lZgii9mQdb5ka_Ul1yziKYm6LnpkBpKNJnW0SCiwPMDPhUWcJVvMzU3ZmsBJWcPItlgkV3pKFbdhNf-g&isSdui=true
+IEEE publication: https://ieeexplore.ieee.org/document/10230156
 
 This repository has the software used for:
 - Collecting data from the Muse2 EEG Headset and a set of EMG electrodes.
